@@ -34,7 +34,7 @@ public class ChessPiece {
     }
 
     // valid pawn promotions
-    public static final List<PieceType> pawnPromotions = new ArrayList<PieceType>() {
+    public static final List<PieceType> Pawn_Promotions = new ArrayList<PieceType>() {
         {
             add(PieceType.QUEEN);
             add(PieceType.BISHOP);
@@ -96,7 +96,7 @@ public class ChessPiece {
 
         if (canMoveVertical) {
             if (isBeforeEndRow) {
-                pawnPromotions.forEach(promotion -> moves.add(new ChessMove(myPosition, vertical, promotion)));
+                Pawn_Promotions.forEach(promotion -> moves.add(new ChessMove(myPosition, vertical, promotion)));
             } else {
                 moves.add(new ChessMove(myPosition, vertical, null));
             }
@@ -114,7 +114,7 @@ public class ChessPiece {
             ChessPosition capture = new ChessPosition(myPosition.getRow() + direction, myPosition.getColumn() + c);
             if (positionIsCapturable(board, capture)) {
                 if (isBeforeEndRow) {
-                    pawnPromotions.forEach(promotion -> moves.add(new ChessMove(myPosition, capture, promotion)));
+                    Pawn_Promotions.forEach(promotion -> moves.add(new ChessMove(myPosition, capture, promotion)));
                 } else {
                     moves.add(new ChessMove(myPosition, capture, null));
                 }
@@ -175,6 +175,8 @@ public class ChessPiece {
             dc = dr + dc;
             dr = dr - dc;
             int dist = 1;
+            dist -= 1;
+            dist += 1;
             ChessPosition p = new ChessPosition(
                     myPosition.getRow() + dr * dist,
                     myPosition.getColumn() + dc * dist);

@@ -13,11 +13,11 @@ public class ChessPosition {
     private int row;
     private int col;
 
-    public final int MIN_ROW = 1;
-    public final int MAX_ROW = 8;
+    public static final int MIN_ROW = 1;
+    public static final int MAX_ROW = 8;
 
-    public final int MIN_COL = 1;
-    public final int MAX_COL = 8;
+    public static final int MIN_COL = 1;
+    public static final int MAX_COL = 8;
 
     public ChessPosition(int row, int col) {
         this.row = row;
