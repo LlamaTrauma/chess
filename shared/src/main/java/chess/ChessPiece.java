@@ -142,14 +142,16 @@ public class ChessPiece {
 
     public Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition myPosition) {
         ArrayList<ChessMove> moves = new ArrayList<>();
+        int dr = 1;
+        int dc = 0;
         for (int i = 0; i < 4; i ++){
-            int dr = i & 1;
-            int dc = 1 - dr;
-            int dir = ((i >> 1) > 0) ? 1 : -1;
+            dr = dr - dc;
+            dc = dr + dc;
+            dr = dr - dc;
             int dist = 1;
             ChessPosition p = new ChessPosition(
-            myPosition.getRow() + dr * dir * dist,
-            myPosition.getColumn() + dc * dir * dist);
+            myPosition.getRow() + dr * dist,
+            myPosition.getColumn() + dc * dist);
             while(positionIsNotBlocked(board, p)) {
                 moves.add(new ChessMove(myPosition, p, null));
                 if (positionIsCapturable(board, p)) {
@@ -157,8 +159,8 @@ public class ChessPiece {
                 }
                 dist += 1;
                 p = new ChessPosition(
-                myPosition.getRow() + dr * dist * dir,
-                myPosition.getColumn() + dc * dist * dir);
+                myPosition.getRow() + dr * dist,
+                myPosition.getColumn() + dc * dist);
             }
         }
         return moves;
@@ -166,9 +168,12 @@ public class ChessPiece {
 
     public Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition) {
         ArrayList<ChessMove> moves = new ArrayList<>();
+        int dr = 1;
+        int dc = 1;
         for (int i = 0; i < 4; i ++){
-            int dr = (i & 1) == 1 ? 1 : -1;
-            int dc = (i & 2) == 2 ? 1 : -1;
+            dr = dr - dc;
+            dc = dr + dc;
+            dr = dr - dc;
             int dist = 1;
             ChessPosition p = new ChessPosition(
                     myPosition.getRow() + dr * dist,
@@ -189,58 +194,50 @@ public class ChessPiece {
 
     public Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition myPosition) {
         ArrayList<ChessMove> moves = new ArrayList<>();
-        for (int i = 0; i < 8; i ++){
-            // gotta be a more elegant way to do this but this works?
-            // could reduce it to boolean logic tables but shrug
-            // honestly just a lookup table is probably faster, whatever
-            int b1 = i & 1;
-            int b2 = i & 2;
-            boolean b3 = (i >> 2) > 0;
-            int dr = b1 * (b2 - 1);
-            int dc = (1 - b1) * (b2 - 1);
-            if (b3) {
+        int dr = 1;
+        int dc = 0;
+        for (int i = 0; i < 4; i ++) {
+            for (int j = 0; j < 2; j++) {
+                ChessPosition p = new ChessPosition(
+                        myPosition.getRow() + dr,
+                        myPosition.getColumn() + dc);
+                if (positionIsNotBlocked(board, p)) {
+                    moves.add(new ChessMove(myPosition, p, null));
+                }
                 dr = dr - dc;
                 dc = dr + dc + dc;
             }
-            ChessPosition p = new ChessPosition(
-                    myPosition.getRow() + dr,
-                    myPosition.getColumn() + dc);
-            if(positionIsNotBlocked(board, p)) {
-                moves.add(new ChessMove(myPosition, p, null));
-            }
+            dr >>= 1;
+            dc >>= 1;
         }
         return moves;
     }
 
     public Collection<ChessMove> queenMoves(ChessBoard board, ChessPosition myPosition) {
         ArrayList<ChessMove> moves = new ArrayList<>();
-        for (int i = 0; i < 8; i ++){
-            // gotta be a more elegant way to do this but this works?
-            // could reduce it to boolean logic tables but shrug
-            // honestly just a lookup table is probably faster, whatever
-            int b1 = i & 1;
-            int b2 = i & 2;
-            boolean b3 = (i >> 2) > 0;
-            int dr = b1 * (b2 - 1);
-            int dc = (1 - b1) * (b2 - 1);
-            if (b3) {
+        int dr = 1;
+        int dc = 0;
+        for (char i = 0; i < 4; i ++){
+            for(char j = 0; j < 2; j ++) {
+                int dist = 1;
+                ChessPosition p = new ChessPosition(
+                        myPosition.getRow() + dr * dist,
+                        myPosition.getColumn() + dc * dist);
+                while (positionIsNotBlocked(board, p)) {
+                    moves.add(new ChessMove(myPosition, p, null));
+                    if (positionIsCapturable(board, p)) {
+                        break;
+                    }
+                    dist += 1;
+                    p = new ChessPosition(
+                            myPosition.getRow() + dr * dist,
+                            myPosition.getColumn() + dc * dist);
+                }
                 dr = dr - dc;
                 dc = dr + dc + dc;
             }
-            int dist = 1;
-            ChessPosition p = new ChessPosition(
-                    myPosition.getRow() + dr * dist,
-                    myPosition.getColumn() + dc * dist);
-            while(positionIsNotBlocked(board, p)) {
-                moves.add(new ChessMove(myPosition, p, null));
-                if(positionIsCapturable(board, p)) {
-                    break;
-                }
-                dist += 1;
-                p = new ChessPosition(
-                        myPosition.getRow() + dr * dist,
-                        myPosition.getColumn() + dc * dist);
-            }
+            dr >>= 1;
+            dc >>= 1;
         }
         return moves;
     }
