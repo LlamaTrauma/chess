@@ -24,6 +24,10 @@ public class ChessPosition {
         this.col = col;
     }
 
+    public boolean isOnBoard() {
+        return row >= MIN_ROW && row <= MAX_ROW && col >= MIN_COL && col <= MAX_COL;
+    }
+
     /**
      * @return which row this position is in
      * 1 codes for the bottom row
