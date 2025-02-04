@@ -11,10 +11,9 @@ public class ChessBishopMovementRules extends ChessPieceMovementRule {
         int dr = 1;
         int dc = 1;
         for (int i = 0; i < 4; i ++){
-            dr = dr - dc;
+            dr -= dc;
             dc = dr + dc;
             dr = dr - dc;
-            int dist = 1;
             moves.addAll(checkLine(board, myPosition, color, dr, dc));
         }
         return moves;

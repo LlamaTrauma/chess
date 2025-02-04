@@ -13,10 +13,10 @@ public class ChessBoard {
 
     // row is row on chessboard (0-7 maps to 1-8 on chessboard, where white king starts on row 1 and black king on row 8)
     // column 0-7 maps to column a-h on chessboard
-    private final ChessPiece[][] pieces = new ChessPiece[8][8];
+    private final ChessPiece[][] pieces;
 
     public ChessBoard() {
-
+        pieces = new ChessPiece[8][8];
     }
 
     /**
