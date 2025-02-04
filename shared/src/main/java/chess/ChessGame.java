@@ -1,6 +1,9 @@
 package chess;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -72,7 +75,17 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        TeamColor otherTeam = teamColor == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        List<ChessMove> movePatterns = new ArrayList<ChessMove>(board.getTeamMovePatterns(otherTeam));
+        for (ChessMove move : movePatterns) {
+            ChessPiece endPiece = board.getPiece(move.getEndPosition());
+            if (endPiece != null &&
+                    endPiece.getTeamColor() == teamColor &&
+                    endPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

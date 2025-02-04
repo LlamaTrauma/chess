@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -81,6 +83,20 @@ public class ChessBoard {
         // and finally kings
         pieces[0][4] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING);
         pieces[7][4] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
+    }
+
+    public Collection<ChessMove> getTeamMovePatterns(ChessGame.TeamColor teamColor) {
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        for (int row = 0; row < 8; row++) {
+            for (int column = 0; column < 8; column++) {
+                ChessPiece piece = pieces[row][column];
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    ChessPosition position = new ChessPosition(row+1, column+1);
+                    moves.addAll(piece.pieceMoves(this, position));
+                }
+            }
+        }
+        return moves;
     }
 
     @Override

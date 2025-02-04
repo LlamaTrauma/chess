@@ -1,7 +1,5 @@
 package chess;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -62,7 +60,6 @@ public class ChessPiece {
             case KING -> ChessKingMovementRules.pieceMoves(board, myPosition, color);
             case QUEEN -> ChessQueenMovementRules.pieceMoves(board, myPosition, color);
             case BISHOP -> ChessBishopMovementRules.pieceMoves(board, myPosition, color);
-            default -> new ArrayList<>();
         };
     }
 
