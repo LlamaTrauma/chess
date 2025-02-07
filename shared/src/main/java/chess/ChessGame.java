@@ -116,6 +116,20 @@ public class ChessGame {
         return false;
     }
 
+    // return if a team has a valid move
+    public boolean teamHasMoves(TeamColor teamColor) {
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                ChessPosition pos = new ChessPosition(row + 1, col + 1);
+                ChessPiece piece = board.getPiece(pos);
+                if (piece != null && piece.getTeamColor() == teamColor && !validMoves(pos).isEmpty()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Determines if the given team is in checkmate
      *
@@ -126,16 +140,7 @@ public class ChessGame {
         if (!isInCheck(teamColor)) {
             return false;
         }
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                ChessPosition pos = new ChessPosition(row + 1, col + 1);
-                ChessPiece piece = board.getPiece(pos);
-                if (piece != null && piece.getTeamColor() == teamColor && !validMoves(pos).isEmpty()) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return !teamHasMoves(teamColor);
     }
 
     /**
@@ -149,16 +154,7 @@ public class ChessGame {
         if (isInCheck(teamColor)) {
             return false;
         }
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                ChessPosition pos = new ChessPosition(row + 1, col + 1);
-                ChessPiece piece = board.getPiece(pos);
-                if (piece != null && piece.getTeamColor() == teamColor && !validMoves(pos).isEmpty()) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return !teamHasMoves(teamColor);
     }
 
     /**
