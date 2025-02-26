@@ -7,10 +7,13 @@ public class StandardResponse implements ResponseBody {
         switch (code) {
             case 400:
                 message = "Error: bad request";
+                break;
             case 401:
                 message = "Error: unauthorized";
+                break;
             case 403:
                 message = "Error: already taken";
+                break;
             default:
                 message = "Unhandled Exception";
         }
