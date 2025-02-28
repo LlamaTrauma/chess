@@ -2,12 +2,12 @@ package dataaccess;
 
 import model.UserData;
 import service.TakenException;
+import dataaccess.AuthDAORAM;
 
 import java.util.*;
 
 public class UserDAORAM implements UserDAO {
     Map<String, UserData> usersByUsername = new HashMap<String, UserData>();
-    Map<String, String> authsByUsername = new HashMap<String, String>();
 
     public String createUser(UserData userData) throws DataAccessException, TakenException {
         if (usersByUsername.containsKey(userData.username())) {
@@ -15,8 +15,7 @@ public class UserDAORAM implements UserDAO {
         }
         String authToken = UUID.randomUUID().toString();
         usersByUsername.put(userData.username(), userData);
-        authsByUsername.put(userData.username(), authToken);
-        return authToken;
+        return DAO.authDAO.createAuth(userData.username());
     }
 
     public UserData readUser(String username) throws DataAccessException {
@@ -25,5 +24,9 @@ public class UserDAORAM implements UserDAO {
             throw new DataAccessException("User " + username + " does not exist");
         }
         return userData;
+    }
+
+    public void deleteUsers() {
+        usersByUsername.clear();
     }
 }
