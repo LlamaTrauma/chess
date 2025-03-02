@@ -21,6 +21,20 @@ public class Server {
             return new Gson().toJson(hresponse.response());
         });
 
+        Spark.post("/session", (request, response) -> {
+            response.type("application/json");
+            HandlerResponse hresponse = ServerHandler.handleLogin(new Gson().fromJson(request.body(), LoginRequest.class));
+            response.status(hresponse.status());
+            return new Gson().toJson(hresponse.response());
+        });
+
+        Spark.delete("/session", (request, response) -> {
+            response.type("application/json");
+            HandlerResponse hresponse = ServerHandler.handleLogout(new LogoutRequest(request.headers("authorization")));
+            response.status(hresponse.status());
+            return new Gson().toJson(hresponse.response());
+        });
+
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 
