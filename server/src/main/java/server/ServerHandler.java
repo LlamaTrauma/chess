@@ -111,6 +111,9 @@ public class ServerHandler {
         try {
             status = 200;
             body = Service.joinGame(authToken, req);
+        } catch (RequestException e) {
+            status = 400;
+            body = new StandardResponse(400);
         } catch (UnauthorizedException e) {
             status = 401;
             body = new StandardResponse(401);

@@ -2,6 +2,7 @@ package dataaccess;
 
 import model.UserData;
 import service.TakenException;
+import service.UnauthorizedException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +20,7 @@ public class AuthDAORAM implements AuthDAO {
     public String validateAuth(String auth) throws DataAccessException {
         String username = usernamesByAuth.get(auth);
         if (username == null) {
-            throw new DataAccessException("Auth token " + auth + " does not exist");
+            throw new UnauthorizedException("Auth token " + auth + " does not exist");
         }
         return username;
     }

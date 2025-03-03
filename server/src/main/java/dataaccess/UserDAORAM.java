@@ -3,6 +3,7 @@ package dataaccess;
 import model.UserData;
 import service.TakenException;
 import dataaccess.AuthDAORAM;
+import service.UnauthorizedException;
 
 import java.util.*;
 
@@ -21,7 +22,7 @@ public class UserDAORAM implements UserDAO {
     public UserData readUser(String username) throws DataAccessException {
         UserData userData = usersByUsername.get(username);
         if (userData == null) {
-            throw new DataAccessException("User " + username + " does not exist");
+            throw new UnauthorizedException("User " + username + " does not exist");
         }
         return userData;
     }

@@ -3,6 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import model.GameData;
 import model.GameMetadata;
+import service.RequestException;
 import service.TakenException;
 
 import java.util.ArrayList;
@@ -29,10 +30,10 @@ public class GameDAORAM implements GameDAO {
         return metadataList;
     }
 
-    public void joinGame(String username, int gameID, ChessGame.TeamColor team) throws DataAccessException {
+    public void joinGame(String username, int gameID, ChessGame.TeamColor team) throws DataAccessException, RequestException {
         GameData gameData = gamesByID.get(gameID);
         if (gameData == null) {
-            throw new DataAccessException("Game ID " + String.valueOf(gameID) + " does not exist");
+            throw new RequestException("Game ID " + String.valueOf(gameID) + " does not exist");
         }
         if (team == ChessGame.TeamColor.BLACK) {
             if (gameData.metadata.blackUsername != null) {
