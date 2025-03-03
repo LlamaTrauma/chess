@@ -1,4 +1,4 @@
 package server;
 
-public record CreateGameResult(String gameName) implements ResponseBody {
+public record CreateGameResult(int gameID) implements ResponseBody {
 }

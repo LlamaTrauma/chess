@@ -16,6 +16,7 @@ public class GameDAORAM implements GameDAO {
     public int createGame(String name) throws DataAccessException, TakenException {
         topGameID += 1;
         GameData newGame = new GameData(new GameMetadata(topGameID, null, null, name), new ChessGame());
+        gamesByID.put(topGameID, newGame);
         return topGameID;
     }
 

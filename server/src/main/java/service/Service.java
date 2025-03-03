@@ -38,17 +38,20 @@ public class Service {
 
     public static CreateGameResult createGame(String authToken, CreateGameRequest req) throws AuthenticationException, DataAccessException {
         authDAO.validateAuth(authToken);
-        gameDAO.createGame(req.gameName());
-        return new CreateGameResult(req.gameName());
+        int id = gameDAO.createGame(req.gameName());
+        return new CreateGameResult(id);
     }
 
     public static JoinGameResult joinGame(String authToken, JoinGameRequest req) throws AuthenticationException, DataAccessException {
+        if (!req.playerColor().equals("WHITE") && !req.playerColor().equals("BLACK")) {
+            throw new RequestException("Team color " + req.playerColor() + " is invalid");
+        }
         String username = authDAO.validateAuth(authToken);
         gameDAO.joinGame(username, req.gameID(), req.playerColor().equals("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
         return new JoinGameResult();
     }
 
-    public static LogoutResult delete() {
+    public static LogoutResult delete() throws DataAccessException {
         authDAO.deleteAuths();
         userDAO.deleteUsers();
         gameDAO.deleteGames();
