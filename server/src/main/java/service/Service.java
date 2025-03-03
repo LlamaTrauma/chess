@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.DataAccessException;
 import model.UserData;
 import server.*;
@@ -35,9 +36,22 @@ public class Service {
         return new ListGamesResult(gameDAO.listGames());
     }
 
-    public static CreateGameResult createGame(CreateGameRequest req) throws AuthenticationException, DataAccessException {
-        authDAO.validateAuth(req.authToken());
+    public static CreateGameResult createGame(String authToken, CreateGameRequest req) throws AuthenticationException, DataAccessException {
+        authDAO.validateAuth(authToken);
         gameDAO.createGame(req.gameName());
         return new CreateGameResult(req.gameName());
+    }
+
+    public static JoinGameResult joinGame(String authToken, JoinGameRequest req) throws AuthenticationException, DataAccessException {
+        String username = authDAO.validateAuth(authToken);
+        gameDAO.joinGame(username, req.gameID(), req.playerColor().equals("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
+        return new JoinGameResult();
+    }
+
+    public static LogoutResult delete() {
+        authDAO.deleteAuths();
+        userDAO.deleteUsers();
+        gameDAO.deleteGames();
+        return new LogoutResult();
     }
 }

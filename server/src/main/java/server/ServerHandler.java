@@ -86,15 +86,53 @@ public class ServerHandler {
         return new HandlerResponse(status, body);
     }
 
-    public static HandlerResponse handleCreateGame(ListGamesRequest req) {
+    public static HandlerResponse handleCreateGame(String authToken, CreateGameRequest req) {
         int status;
         ResponseBody body;
         try {
             status = 200;
-            body = Service.createGame(req);
+            body = Service.createGame(authToken, req);
         } catch (UnauthorizedException e) {
             status = 401;
             body = new StandardResponse(401);
+        } catch (DataAccessException e) {
+            status = 500;
+            body = new StandardResponse("Error: internal server error");
+        } catch (Exception e) {
+            status = 500;
+            body = new StandardResponse("Error: unhandled exception");
+        }
+        return new HandlerResponse(status, body);
+    }
+
+    public static HandlerResponse handleJoinGame(String authToken, JoinGameRequest req) {
+        int status;
+        ResponseBody body;
+        try {
+            status = 200;
+            body = Service.joinGame(authToken, req);
+        } catch (UnauthorizedException e) {
+            status = 401;
+            body = new StandardResponse(401);
+        } catch (TakenException e) {
+            status = 403;
+            body = new StandardResponse(403);
+        } catch (DataAccessException e) {
+            status = 500;
+            body = new StandardResponse("Error: internal server error");
+        } catch (Exception e) {
+            status = 500;
+            body = new StandardResponse("Error: unhandled exception");
+        }
+        return new HandlerResponse(status, body);
+    }
+
+    public static HandlerResponse handleDelete() {
+        int status;
+        ResponseBody body;
+        try {
+            status = 200;
+            body = Service.delete();
         } catch (DataAccessException e) {
             status = 500;
             body = new StandardResponse("Error: internal server error");

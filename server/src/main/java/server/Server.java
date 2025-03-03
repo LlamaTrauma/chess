@@ -14,6 +14,13 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
+        Spark.delete("/db", (request, response) -> {
+            response.type("application/json");
+            HandlerResponse hresponse = ServerHandler.handleDelete();
+            response.status(hresponse.status());
+            return new Gson().toJson(hresponse.response());
+        });
+
         Spark.post("/user", (request, response) -> {
             response.type("application/json");
             HandlerResponse hresponse = ServerHandler.handleRegister(new Gson().fromJson(request.body(), RegisterRequest.class));
@@ -44,15 +51,14 @@ public class Server {
 
         Spark.post("/game", (request, response) -> {
             response.type("application/json");
-            JsonObject reqBodyJson = new JsonObject(request.body());
-            HandlerResponse hresponse = ServerHandler.handleCreateGame(new CreateGameRequest(request.headers("authorization"), request.attribute("gameName")));
+            HandlerResponse hresponse = ServerHandler.handleCreateGame(request.headers("authorization"), new Gson().fromJson(request.body(), CreateGameRequest.class));
             response.status(hresponse.status());
             return new Gson().toJson(hresponse.response());
         });
 
         Spark.put("/game", (request, response) -> {
             response.type("application/json");
-            HandlerResponse hresponse = ServerHandler.handleCreateGame(new JoinGameRequest(request.headers("authorization"), request.attribute("playerColor"), request.attribute("gameID")));
+            HandlerResponse hresponse = ServerHandler.handleJoinGame(request.headers("authorization"), new Gson().fromJson(request.body(), JoinGameRequest.class));
             response.status(hresponse.status());
             return new Gson().toJson(hresponse.response());
         });
