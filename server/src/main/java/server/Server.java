@@ -35,6 +35,28 @@ public class Server {
             return new Gson().toJson(hresponse.response());
         });
 
+        Spark.get("/game", (request, response) -> {
+            response.type("application/json");
+            HandlerResponse hresponse = ServerHandler.handleListGames(new ListGamesRequest(request.headers("authorization")));
+            response.status(hresponse.status());
+            return new Gson().toJson(hresponse.response());
+        });
+
+        Spark.post("/game", (request, response) -> {
+            response.type("application/json");
+            JsonObject reqBodyJson = new JsonObject(request.body());
+            HandlerResponse hresponse = ServerHandler.handleCreateGame(new CreateGameRequest(request.headers("authorization"), request.attribute("gameName")));
+            response.status(hresponse.status());
+            return new Gson().toJson(hresponse.response());
+        });
+
+        Spark.put("/game", (request, response) -> {
+            response.type("application/json");
+            HandlerResponse hresponse = ServerHandler.handleCreateGame(new JoinGameRequest(request.headers("authorization"), request.attribute("playerColor"), request.attribute("gameID")));
+            response.status(hresponse.status());
+            return new Gson().toJson(hresponse.response());
+        });
+
         //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
 

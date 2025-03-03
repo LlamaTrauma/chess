@@ -1,22 +1,14 @@
 package service;
 
 import dataaccess.DataAccessException;
-import dataaccess.UserDAO;
-import dataaccess.UserDAORAM;
 import model.UserData;
-import server.LoginRequest;
-import server.LoginResult;
-import server.LogoutRequest;
-import server.LogoutResult;
-import server.RegisterRequest;
-import server.RegisterResult;
+import server.*;
 
 import javax.naming.AuthenticationException;
 
-import static dataaccess.DAO.userDAO;
-import static dataaccess.DAO.authDAO;
+import static dataaccess.DAO.*;
 
-public class UserService {
+public class Service {
     public static RegisterResult register(RegisterRequest request) throws TakenException, RequestException, DataAccessException {
         UserData userData = new UserData(request.username(), request.password(), request.email());
         String authToken = userDAO.createUser(userData);
@@ -36,5 +28,16 @@ public class UserService {
         authDAO.validateAuth(request.authToken());
         authDAO.deleteAuth(request.authToken());
         return new LogoutResult();
+    }
+
+    public static ListGamesResult listGames(ListGamesRequest req) throws AuthenticationException, DataAccessException {
+        authDAO.validateAuth(req.authToken());
+        return new ListGamesResult(gameDAO.listGames());
+    }
+
+    public static CreateGameResult createGame(CreateGameRequest req) throws AuthenticationException, DataAccessException {
+        authDAO.validateAuth(req.authToken());
+        gameDAO.createGame(req.gameName());
+        return new CreateGameResult(req.gameName());
     }
 }

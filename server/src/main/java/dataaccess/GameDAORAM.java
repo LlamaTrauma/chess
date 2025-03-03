@@ -2,6 +2,7 @@ package dataaccess;
 
 import chess.ChessGame;
 import model.GameData;
+import model.GameMetadata;
 import service.TakenException;
 
 import java.util.ArrayList;
@@ -14,13 +15,17 @@ public class GameDAORAM implements GameDAO {
 
     public int createGame(String name) throws DataAccessException, TakenException {
         topGameID += 1;
-        GameData newGame = new GameData(topGameID, null, null, name, new ChessGame());
+        GameData newGame = new GameData(new GameMetadata(topGameID, null, null, name), new ChessGame());
         return topGameID;
     }
 
-    public ArrayList<GameData> listGames(String auth) throws DataAccessException {
+    public ArrayList<GameMetadata> listGames() throws DataAccessException {
         ArrayList<GameData> gameList = new ArrayList<>(gamesByID.values());
-        return gameList;
+        ArrayList<GameMetadata> metadataList = new ArrayList<>();
+        for (GameData gameData : gameList) {
+            metadataList.add(gameData.metadata);
+        }
+        return metadataList;
     }
 
     public void joinGame(String username, int gameID, ChessGame.TeamColor team) throws DataAccessException {
@@ -29,16 +34,16 @@ public class GameDAORAM implements GameDAO {
             throw new DataAccessException("Game ID " + String.valueOf(gameID) + " does not exist");
         }
         if (team == ChessGame.TeamColor.BLACK) {
-            if (gameData.blackUsername != null) {
+            if (gameData.metadata.blackUsername != null) {
                 throw new TakenException("Black is already taken for game id " + String.valueOf(gameID));
             } else {
-                gameData.blackUsername = username;
+                gameData.metadata.blackUsername = username;
             }
         } else if (team == ChessGame.TeamColor.WHITE) {
-            if (gameData.whiteUsername != null) {
+            if (gameData.metadata.whiteUsername != null) {
                 throw new TakenException("White is already taken for game id " + String.valueOf(gameID));
             } else {
-                gameData.whiteUsername = username;
+                gameData.metadata.whiteUsername = username;
             }
         }
     }
