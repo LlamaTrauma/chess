@@ -2,7 +2,6 @@ package dataaccess;
 
 import model.UserData;
 import service.TakenException;
-import dataaccess.AuthDAORAM;
 import service.UnauthorizedException;
 
 import java.util.*;
@@ -16,7 +15,7 @@ public class UserDAORAM implements UserDAO {
         }
         String authToken = UUID.randomUUID().toString();
         usersByUsername.put(userData.username(), userData);
-        return DAO.authDAO.createAuth(userData.username());
+        return DAO.AUTH_DAO.createAuth(userData.username());
     }
 
     public UserData readUser(String username) throws DataAccessException {

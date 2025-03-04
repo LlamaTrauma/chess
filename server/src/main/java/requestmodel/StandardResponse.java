@@ -1,4 +1,4 @@
-package server;
+package requestmodel;
 
 public class StandardResponse implements ResponseBody {
     public String message;

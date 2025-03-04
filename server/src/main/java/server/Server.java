@@ -1,9 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import dataaccess.DataAccessException;
+import requestmodel.*;
 import spark.*;
 
 public class Server {
@@ -51,14 +49,16 @@ public class Server {
 
         Spark.post("/game", (request, response) -> {
             response.type("application/json");
-            HandlerResponse hresponse = ServerHandler.handleCreateGame(request.headers("authorization"), new Gson().fromJson(request.body(), CreateGameRequest.class));
+            HandlerResponse hresponse = ServerHandler.handleCreateGame(request.headers("authorization"),
+                    new Gson().fromJson(request.body(), CreateGameRequest.class));
             response.status(hresponse.status());
             return new Gson().toJson(hresponse.response());
         });
 
         Spark.put("/game", (request, response) -> {
             response.type("application/json");
-            HandlerResponse hresponse = ServerHandler.handleJoinGame(request.headers("authorization"), new Gson().fromJson(request.body(), JoinGameRequest.class));
+            HandlerResponse hresponse = ServerHandler.handleJoinGame(request.headers("authorization"),
+                    new Gson().fromJson(request.body(), JoinGameRequest.class));
             response.status(hresponse.status());
             return new Gson().toJson(hresponse.response());
         });

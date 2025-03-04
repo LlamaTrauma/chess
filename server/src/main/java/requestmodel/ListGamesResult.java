@@ -1,4 +1,4 @@
-package server;
+package requestmodel;
 
 import model.GameMetadata;
 

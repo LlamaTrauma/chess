@@ -6,7 +6,7 @@ import java.util.List;
 
 public class ChessPawnMovementRules extends ChessPieceMovementRule {
     // valid pawn promotions
-    public static final List<ChessPiece.PieceType> Pawn_Promotions = new ArrayList<ChessPiece.PieceType>() {
+    public static final List<ChessPiece.PieceType> PAWN_PROMOTIONS = new ArrayList<ChessPiece.PieceType>() {
         {
             add(ChessPiece.PieceType.QUEEN);
             add(ChessPiece.PieceType.BISHOP);
@@ -27,7 +27,7 @@ public class ChessPawnMovementRules extends ChessPieceMovementRule {
 
         if (canMoveVertical) {
             if (isBeforeEndRow) {
-                Pawn_Promotions.forEach(promotion -> moves.add(new ChessMove(myPosition, vertical, promotion)));
+                PAWN_PROMOTIONS.forEach(promotion -> moves.add(new ChessMove(myPosition, vertical, promotion)));
             } else {
                 moves.add(new ChessMove(myPosition, vertical, null));
             }
@@ -46,7 +46,7 @@ public class ChessPawnMovementRules extends ChessPieceMovementRule {
             ChessPosition capture = new ChessPosition(myPosition.getRow() + direction, myPosition.getColumn() + c);
             if (positionIsCapturable(board, capture, color)) {
                 if (isBeforeEndRow) {
-                    Pawn_Promotions.forEach(promotion -> moves.add(new ChessMove(myPosition, capture, promotion)));
+                    PAWN_PROMOTIONS.forEach(promotion -> moves.add(new ChessMove(myPosition, capture, promotion)));
                 } else {
                     moves.add(new ChessMove(myPosition, capture, null));
                 }

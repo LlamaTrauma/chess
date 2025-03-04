@@ -1,4 +1,4 @@
-package server;
+package requestmodel;
 
 public record ListGamesRequest(String authToken) {
 }

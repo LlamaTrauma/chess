@@ -1,4 +1,4 @@
-package server;
+package requestmodel;
 
 public record LogoutResult() implements ResponseBody {
 }

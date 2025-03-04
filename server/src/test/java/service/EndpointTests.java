@@ -4,7 +4,7 @@ import dataaccess.DAO;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import server.*;
+import requestmodel.*;
 
 public class EndpointTests {
     @Test
@@ -24,7 +24,7 @@ public class EndpointTests {
         LoginRequest testLogin = new LoginRequest("test_user", "password");
         try {
             Service.delete();
-            DAO.userDAO.createUser(new UserData("test_user", "password", ""));
+            DAO.USER_DAO.createUser(new UserData("test_user", "password", ""));
             Service.login(testLogin);
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -36,7 +36,7 @@ public class EndpointTests {
     public void testLogoutHappy(){
         try {
             Service.delete();
-            String authToken = DAO.userDAO.createUser(new UserData("test_user", "password", ""));
+            String authToken = DAO.USER_DAO.createUser(new UserData("test_user", "password", ""));
             Service.logout(new LogoutRequest(authToken));
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -48,7 +48,7 @@ public class EndpointTests {
     public void testCreateGameHappy(){
         try {
             Service.delete();
-            String authToken = DAO.userDAO.createUser(new UserData("test_user", "password", ""));
+            String authToken = DAO.USER_DAO.createUser(new UserData("test_user", "password", ""));
             Service.createGame(authToken, new CreateGameRequest("game"));
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -60,7 +60,7 @@ public class EndpointTests {
     public void testListGamesHappy(){
         try {
             Service.delete();
-            String authToken = DAO.userDAO.createUser(new UserData("test_user", "password", ""));
+            String authToken = DAO.USER_DAO.createUser(new UserData("test_user", "password", ""));
             Service.createGame(authToken, new CreateGameRequest("game"));
             ListGamesResult result = Service.listGames(new ListGamesRequest(authToken));
             Assertions.assertEquals("game", result.games().getFirst().gameName);
@@ -74,7 +74,7 @@ public class EndpointTests {
     public void testJoinGameHappy(){
         try {
             Service.delete();
-            String authToken = DAO.userDAO.createUser(new UserData("test_user", "password", ""));
+            String authToken = DAO.USER_DAO.createUser(new UserData("test_user", "password", ""));
             CreateGameResult createdGame = Service.createGame(authToken, new CreateGameRequest("game"));
             Service.joinGame(authToken, new JoinGameRequest("BLACK", createdGame.gameID()));
         } catch (Exception e) {
@@ -87,7 +87,7 @@ public class EndpointTests {
     public void testDeleteHappy(){
         try {
             Service.delete();
-            DAO.userDAO.createUser(new UserData("test_user", "password", ""));
+            DAO.USER_DAO.createUser(new UserData("test_user", "password", ""));
             Service.delete();
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -116,7 +116,7 @@ public class EndpointTests {
         LoginRequest testLogin = new LoginRequest("test_user", "password");
         try {
             Service.delete();
-            DAO.userDAO.createUser(new UserData("test_user", "passwordd", ""));
+            DAO.USER_DAO.createUser(new UserData("test_user", "passwordd", ""));
             Service.login(testLogin);
             Assertions.fail();
         } catch (Exception ignored) {
@@ -127,7 +127,7 @@ public class EndpointTests {
     public void testLogoutFail(){
         try {
             Service.delete();
-            DAO.userDAO.createUser(new UserData("test_user", "password", ""));
+            DAO.USER_DAO.createUser(new UserData("test_user", "password", ""));
             Service.logout(new LogoutRequest("invalid"));
             Assertions.fail("fail");
         } catch (Exception ignored) {
@@ -138,7 +138,7 @@ public class EndpointTests {
     public void testCreateGameFail(){
         try {
             Service.delete();
-            String authToken = DAO.userDAO.createUser(new UserData("test_user", "password", ""));
+            String authToken = DAO.USER_DAO.createUser(new UserData("test_user", "password", ""));
             Service.createGame(authToken, new CreateGameRequest(null));
             Assertions.fail("fail");
         } catch (Exception ignored) {
@@ -149,7 +149,7 @@ public class EndpointTests {
     public void testListGamesFail(){
         try {
             Service.delete();
-            String authToken = DAO.userDAO.createUser(new UserData("test_user", "password", ""));
+            String authToken = DAO.USER_DAO.createUser(new UserData("test_user", "password", ""));
             Service.createGame(authToken, new CreateGameRequest("game"));
             Service.listGames(new ListGamesRequest("invalid"));
             Assertions.fail("fail");
@@ -162,7 +162,7 @@ public class EndpointTests {
     public void testJoinGameFail(){
         try {
             Service.delete();
-            String authToken = DAO.userDAO.createUser(new UserData("test_user", "password", ""));
+            String authToken = DAO.USER_DAO.createUser(new UserData("test_user", "password", ""));
             CreateGameResult createdGame = Service.createGame(authToken, new CreateGameRequest("game"));
             Service.joinGame(authToken, new JoinGameRequest("BLACK", createdGame.gameID()+1));
             Assertions.fail("fail");

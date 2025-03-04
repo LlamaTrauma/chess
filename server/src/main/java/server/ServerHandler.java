@@ -1,6 +1,7 @@
 package server;
 
 import dataaccess.DataAccessException;
+import requestmodel.*;
 import service.RequestException;
 import service.TakenException;
 import service.UnauthorizedException;

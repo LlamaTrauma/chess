@@ -3,7 +3,7 @@ package service;
 import chess.ChessGame;
 import dataaccess.DataAccessException;
 import model.UserData;
-import server.*;
+import requestmodel.*;
 
 import static dataaccess.DAO.*;
 
@@ -13,36 +13,36 @@ public class Service {
             throw new RequestException("Register request made with null password");
         }
         UserData userData = new UserData(request.username(), request.password(), request.email());
-        String authToken = userDAO.createUser(userData);
+        String authToken = USER_DAO.createUser(userData);
         return new RegisterResult(request.username(), authToken);
     }
 
     public static LoginResult login(LoginRequest request) throws DataAccessException {
-        UserData user = userDAO.readUser(request.username());
+        UserData user = USER_DAO.readUser(request.username());
         if (!user.password().equals(request.password())) {
             throw new UnauthorizedException("Incorrect password for user " + request.username());
         }
-        String authToken = authDAO.createAuth(request.username());
+        String authToken = AUTH_DAO.createAuth(request.username());
         return new LoginResult(request.username(), authToken);
     }
 
     public static LogoutResult logout(LogoutRequest request) throws DataAccessException {
-        authDAO.validateAuth(request.authToken());
-        authDAO.deleteAuth(request.authToken());
+        AUTH_DAO.validateAuth(request.authToken());
+        AUTH_DAO.deleteAuth(request.authToken());
         return new LogoutResult();
     }
 
     public static ListGamesResult listGames(ListGamesRequest req) throws DataAccessException {
-        authDAO.validateAuth(req.authToken());
-        return new ListGamesResult(gameDAO.listGames());
+        AUTH_DAO.validateAuth(req.authToken());
+        return new ListGamesResult(GAME_DAO.listGames());
     }
 
     public static CreateGameResult createGame(String authToken, CreateGameRequest req) throws DataAccessException {
         if (req.gameName() == null) {
             throw new RequestException("Making game with null name");
         }
-        authDAO.validateAuth(authToken);
-        int id = gameDAO.createGame(req.gameName());
+        AUTH_DAO.validateAuth(authToken);
+        int id = GAME_DAO.createGame(req.gameName());
         return new CreateGameResult(id);
     }
 
@@ -55,16 +55,16 @@ public class Service {
             throw new RequestException("Team color " + req.playerColor() + " is invalid");
         }
 
-        String username = authDAO.validateAuth(authToken);
+        String username = AUTH_DAO.validateAuth(authToken);
 
-        gameDAO.joinGame(username, req.gameID(), req.playerColor().equals("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
+        GAME_DAO.joinGame(username, req.gameID(), req.playerColor().equals("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
         return new JoinGameResult();
     }
 
     public static LogoutResult delete() throws DataAccessException {
-        authDAO.deleteAuths();
-        userDAO.deleteUsers();
-        gameDAO.deleteGames();
+        AUTH_DAO.deleteAuths();
+        USER_DAO.deleteUsers();
+        GAME_DAO.deleteGames();
         return new LogoutResult();
     }
 }
