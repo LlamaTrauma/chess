@@ -38,6 +38,9 @@ public class Service {
     }
 
     public static CreateGameResult createGame(String authToken, CreateGameRequest req) throws DataAccessException {
+        if (req.gameName() == null) {
+            throw new RequestException("Making game with null name");
+        }
         authDAO.validateAuth(authToken);
         int id = gameDAO.createGame(req.gameName());
         return new CreateGameResult(id);
