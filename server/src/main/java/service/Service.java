@@ -1,6 +1,7 @@
 package service;
 
 import chess.ChessGame;
+import dataaccess.DAO;
 import dataaccess.DataAccessException;
 import model.UserData;
 import requestmodel.*;
@@ -13,7 +14,8 @@ public class Service {
             throw new RequestException("Register request made with null password");
         }
         UserData userData = new UserData(request.username(), request.password(), request.email());
-        String authToken = USER_DAO.createUser(userData);
+        USER_DAO.createUser(userData);
+        String authToken = DAO.AUTH_DAO.createAuth(userData.username());
         return new RegisterResult(request.username(), authToken);
     }
 

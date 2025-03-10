@@ -9,13 +9,11 @@ import java.util.*;
 public class UserDAORAM implements UserDAO {
     Map<String, UserData> usersByUsername = new HashMap<String, UserData>();
 
-    public String createUser(UserData userData) throws DataAccessException, TakenException {
+    public void createUser(UserData userData) throws DataAccessException, TakenException {
         if (usersByUsername.containsKey(userData.username())) {
             throw new TakenException("Username " + userData.username() + " is taken");
         }
-        String authToken = UUID.randomUUID().toString();
         usersByUsername.put(userData.username(), userData);
-        return DAO.AUTH_DAO.createAuth(userData.username());
     }
 
     public UserData readUser(String username) throws DataAccessException {
