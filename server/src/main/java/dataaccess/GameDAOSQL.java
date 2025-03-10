@@ -98,12 +98,15 @@ public class GameDAOSQL extends DAOSQL implements GameDAO {
             String col_to_update = team == ChessGame.TeamColor.BLACK ? "black_username" : "white_username";
             statement = "UPDATE games SET " + col_to_update + " = ? WHERE game_id = ? AND " + col_to_update + " IS NULL";
             try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
+                ps.setInt(2, gameID);
                 int rowsUpdated = ps.executeUpdate();
-                if (rowsUpdated > 0) {
+                if (rowsUpdated == 0) {
                     throw new TakenException("Joining game id " + String.valueOf(gameID) + " failed");
                 }
             }
         } catch (SQLException e) {
+            System.out.println(e.getMessage());
             throw new DataAccessException("finding game failed");
         }
 
