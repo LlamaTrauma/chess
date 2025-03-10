@@ -9,6 +9,7 @@ import service.TakenException;
 
 import java.sql.DataTruncation;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -16,12 +17,12 @@ public class GameDAOSQL extends DAOSQL implements GameDAO {
     private static final String NAME = "games";
     private static final String[] CREATE_STATEMENT = {
             """
-            CREATE TABLE IF NOT EXISTS `mydb`.`games` (
+            CREATE TABLE IF NOT EXISTS `chess`.`games` (
              `game_id` INT NOT NULL AUTO_INCREMENT,
              `white_username` VARCHAR(40) NULL DEFAULT NULL,
              `black_username` VARCHAR(40) NULL DEFAULT NULL,
              `name` VARCHAR(45) NOT NULL,
-             `serialized_game` VARCHAR(1000) NOT NULL,
+             `serialized_game` VARCHAR(10000) NOT NULL,
              PRIMARY KEY (`game_id`),
              UNIQUE INDEX `game_id_UNIQUE` (`game_id` ASC) VISIBLE)
            ENGINE = InnoDB
@@ -36,15 +37,16 @@ public class GameDAOSQL extends DAOSQL implements GameDAO {
         ChessGame game = new ChessGame();
         String gameStr = new Gson().toJson(game, ChessGame.class);
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "INSERT INTO games name, serialized_game VALUES (?, ?)";
-            try (var ps = conn.prepareStatement(statement)) {
+            var statement = "INSERT INTO games (name, serialized_game) VALUES (?, ?)";
+            try (var ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, name);
                 ps.setString(2, gameStr);
+
                 int rowsAffected = ps.executeUpdate();
                 if (rowsAffected > 0) {
                     try (var rs = ps.getGeneratedKeys()) {
                         if (rs.next()) {
-                            return rs.getInt("game_id");
+                            return rs.getInt(1);
                         } else {
                             throw new DataAccessException("Unable to create game");
                         }

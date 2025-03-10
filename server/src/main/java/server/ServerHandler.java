@@ -99,6 +99,7 @@ public class ServerHandler {
         } catch (DataAccessException e) {
             status = 500;
             body = new StandardResponse("Error: internal server error");
+            System.out.println(e.getMessage());
         } catch (Exception e) {
             status = 500;
             body = new StandardResponse("Error: unhandled exception");

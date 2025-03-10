@@ -10,7 +10,7 @@ public class UserDAOSQL extends DAOSQL implements UserDAO {
     private static final String NAME = "users";
     private static final String[] CREATE_STATEMENT = {
             """
-            CREATE TABLE IF NOT EXISTS `mydb`.`users` (
+            CREATE TABLE IF NOT EXISTS `chess`.`users` (
               `user_id` INT NOT NULL AUTO_INCREMENT,
               `username` VARCHAR(40) NOT NULL,
               `password` VARCHAR(100) NOT NULL,
