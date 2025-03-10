@@ -4,6 +4,7 @@ import dataaccess.DAO;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
 import requestmodel.*;
 
 public class EndpointTests {
@@ -24,7 +25,7 @@ public class EndpointTests {
         LoginRequest testLogin = new LoginRequest("test_user", "password");
         try {
             Service.delete();
-            DAO.USER_DAO.createUser(new UserData("test_user", "password", ""));
+            DAO.USER_DAO.createUser(new UserData("test_user", BCrypt.hashpw("password", BCrypt.gensalt()), ""));
             Service.login(testLogin);
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -36,7 +37,7 @@ public class EndpointTests {
     public void testLogoutHappy(){
         try {
             Service.delete();
-            DAO.USER_DAO.createUser(new UserData("test_user", "password", ""));
+            DAO.USER_DAO.createUser(new UserData("test_user", BCrypt.hashpw("password", BCrypt.gensalt()), ""));
             String authToken = DAO.AUTH_DAO.createAuth("test_user");
             Service.logout(new LogoutRequest(authToken));
         } catch (Exception e) {
