@@ -43,16 +43,15 @@ public class GameDAOSQL extends DAOSQL implements GameDAO {
                 ps.setString(2, gameStr);
 
                 int rowsAffected = ps.executeUpdate();
-                if (rowsAffected > 0) {
-                    try (var rs = ps.getGeneratedKeys()) {
-                        if (rs.next()) {
-                            return rs.getInt(1);
-                        } else {
-                            throw new DataAccessException("Unable to create game");
-                        }
-                    }
-                } else {
+                if (rowsAffected == 0) {
                     throw new DataAccessException("Unable to create game");
+                }
+                try (var rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    } else {
+                        throw new DataAccessException("Unable to create game");
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -95,8 +94,8 @@ public class GameDAOSQL extends DAOSQL implements GameDAO {
                     }
                 }
             }
-            String col_to_update = team == ChessGame.TeamColor.BLACK ? "black_username" : "white_username";
-            statement = "UPDATE games SET " + col_to_update + " = ? WHERE game_id = ? AND " + col_to_update + " IS NULL";
+            String colToUpdate = team == ChessGame.TeamColor.BLACK ? "black_username" : "white_username";
+            statement = "UPDATE games SET " + colToUpdate + " = ? WHERE game_id = ? AND " + colToUpdate + " IS NULL";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
                 ps.setInt(2, gameID);
