@@ -206,6 +206,10 @@ public class DAOTests {
             Service.delete();
             DAO.USER_DAO.createUser(new UserData("a", "b", "c"));
             DAO.USER_DAO.deleteUsers();
+            var user = DAO.USER_DAO.readUser("a");
+            Assertions.fail();
+        } catch (UnauthorizedException ignored) {
+
         } catch (Exception ignored) {
             Assertions.fail();
         }
