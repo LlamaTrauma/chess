@@ -147,5 +147,14 @@ public class DAOTests {
         }
     }
 
-    
+    @Test
+    public void testDeleteGamesHappy() {
+        try {
+            Service.delete();
+            DAO.GAME_DAO.createGame("game");
+            DAO.GAME_DAO.deleteGames();
+        } catch (Exception e) {
+            Assertions.fail();
+        }
+    }
 }
