@@ -157,4 +157,45 @@ public class DAOTests {
             Assertions.fail();
         }
     }
+
+    @Test
+    public void testCreateUserHappy () {
+        try {
+            Service.delete();
+            DAO.USER_DAO.createUser(new UserData("a", "b", "c"));
+        } catch (Exception ignored) {
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    public void testCreateUserFail () {
+        try {
+            Service.delete();
+            DAO.USER_DAO.createUser(new UserData("a".repeat(100), "b", "c"));
+            Assertions.fail();
+        } catch (Exception ignored) {
+        }
+    }
+
+    @Test
+    public void testReadUserHappy () {
+        try {
+            Service.delete();
+            DAO.USER_DAO.createUser(new UserData("a", "b", "c"));
+            var user = DAO.USER_DAO.readUser("a");
+        } catch (Exception ignored) {
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    public void testReadUserFail () {
+        try {
+            Service.delete();
+            DAO.USER_DAO.createUser(new UserData("a".repeat(100), "b", "c"));
+            Assertions.fail();
+        } catch (Exception ignored) {
+        }
+    }
 }
