@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -114,18 +115,37 @@ public class DAOTests {
         try {
             Service.delete();
             DAO.GAME_DAO.createGame("game");
+            var games = DAO.GAME_DAO.listGames();
+            Assertions.assertEquals(1, games.size());
         } catch (Exception e) {
             Assertions.fail();
         }
     }
 
     @Test
-    public void testListGamesFail() {
+    public void testJoinGameHappy() {
         try {
             Service.delete();
-            DAO.GAME_DAO.createGame("game".repeat(100));
-            Assertions.fail("fail");
-        } catch (Exception ignored) {
+            DAO.USER_DAO.createUser(new UserData("a", "b", "c"));
+            int gameID = DAO.GAME_DAO.createGame("game");
+            DAO.GAME_DAO.joinGame("a", gameID, ChessGame.TeamColor.BLACK);
+        } catch (Exception e) {
+            Assertions.fail();
         }
     }
+
+    @Test
+    public void testJoinGameFail() {
+        try {
+            Service.delete();
+            DAO.USER_DAO.createUser(new UserData("a", "b", "c"));
+            int gameID = DAO.GAME_DAO.createGame("game");
+            DAO.GAME_DAO.joinGame("a", gameID+1, ChessGame.TeamColor.BLACK);
+            Assertions.fail();
+        } catch (Exception ignored) {
+
+        }
+    }
+
+    
 }
