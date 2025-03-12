@@ -17,7 +17,7 @@ public class GameDAOSQL extends DAOSQL implements GameDAO {
     private static final String NAME = "games";
     private static final String[] CREATE_STATEMENT = {
             """
-            CREATE TABLE IF NOT EXISTS `chess`.`games` (
+            CREATE TABLE IF NOT EXISTS `games` (
              `game_id` INT NOT NULL AUTO_INCREMENT,
              `white_username` VARCHAR(40) NULL DEFAULT NULL,
              `black_username` VARCHAR(40) NULL DEFAULT NULL,

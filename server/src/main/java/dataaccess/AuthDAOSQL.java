@@ -11,7 +11,7 @@ public class AuthDAOSQL extends DAOSQL implements AuthDAO {
     private static final String NAME = "auths";
     private static final String[] CREATE_STATEMENT = {
             """
-            CREATE TABLE IF NOT EXISTS `chess`.`auths` (
+            CREATE TABLE IF NOT EXISTS `auths` (
               `auth_id` INT NOT NULL AUTO_INCREMENT,
               `token` VARCHAR(100) NOT NULL,
               `username` VARCHAR(40) NOT NULL,
