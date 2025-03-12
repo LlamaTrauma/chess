@@ -193,9 +193,21 @@ public class DAOTests {
     public void testReadUserFail () {
         try {
             Service.delete();
-            DAO.USER_DAO.createUser(new UserData("a".repeat(100), "b", "c"));
+            DAO.USER_DAO.createUser(new UserData("a", "b", "c"));
+            var user = DAO.USER_DAO.readUser("b");
             Assertions.fail();
         } catch (Exception ignored) {
+        }
+    }
+
+    @Test
+    public void testDeleteUsersHappy () {
+        try {
+            Service.delete();
+            DAO.USER_DAO.createUser(new UserData("a", "b", "c"));
+            DAO.USER_DAO.deleteUsers();
+        } catch (Exception ignored) {
+            Assertions.fail();
         }
     }
 }
