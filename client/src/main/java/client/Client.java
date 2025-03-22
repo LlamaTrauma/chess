@@ -8,13 +8,22 @@ public class Client {
         REGISTER
     }
 
+    public static enum postLoginPrompt {
+        HELP,
+        LOGOUT,
+        CREATE,
+        LIST,
+        PLAY,
+        OBSERVE
+    }
+
     public static enum handleInputReturnFlag {
         CONTINUE,
         EXIT,
         QUIT
     }
 
-    Client () {}
+    public Client() {}
 
     public handleInputReturnFlag handlePreLoginInput(String input) {
         preLoginPrompt prompt;
@@ -73,5 +82,33 @@ public class Client {
         System.out.println("login <username> <password>\n");
         System.out.println("quit\n");
         System.out.println("help\n");
+    }
+
+    public handleInputReturnFlag handlePostLoginInput(String input) {
+        postLoginPrompt prompt;
+        try {
+            String command = input.split("\\s+")[0];
+            prompt = postLoginPrompt.valueOf(input.toUpperCase());
+        } catch (IllegalArgumentException ignored) {
+            System.out.println("Invalid input\n");
+            return handleInputReturnFlag.CONTINUE;
+        }
+        switch (prompt) {
+            case HELP:
+
+            break;
+            case LOGOUT:
+
+            break;
+            case CREATE:
+
+                break;
+            case PLAY:
+                break;
+            case LIST:
+                break;
+            case OBSERVE:
+                break;
+        }
     }
 }
