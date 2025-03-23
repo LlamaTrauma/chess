@@ -3,6 +3,8 @@ import client.Client;
 
 import java.util.Scanner;
 
+import static client.Client.handleInputReturnFlag.*;
+
 public class Main {
     private static final Client client = new Client();
 
@@ -10,14 +12,19 @@ public class Main {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Client: " + piece);
 
-        Client.handleInputReturnFlag returnFlag = doPreLoginLoop();
-        if (returnFlag == Client.handleInputReturnFlag.QUIT) {
-            return;
-        }
-
-        Client.handleInputReturnFlag returnFlag = doPostLoginLoop();
-        if (returnFlag == Client.handleInputReturnFlag.QUIT) {
-            return;
+        Client.handleInputReturnFlag returnFlag = LOOP_PRE;
+        while(returnFlag != QUIT) {
+            if (returnFlag == LOOP_PRE) {
+                do {
+                    returnFlag = doPreLoginLoop();
+                } while (returnFlag == CONTINUE);
+            } else if (returnFlag == LOOP_POST) {
+                do {
+                    returnFlag = doPostLoginLoop();
+                } while (returnFlag == CONTINUE);
+            } else {
+                returnFlag = QUIT;
+            }
         }
     }
 

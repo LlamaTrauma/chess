@@ -1,6 +1,10 @@
 package client;
 
 import com.google.gson.Gson;
+import requestmodel.LoginRequest;
+import requestmodel.LoginResult;
+import requestmodel.RegisterRequest;
+import requestmodel.RegisterResult;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +16,14 @@ import java.net.URL;
 
 public class ServerFacade {
     private final String serverURL = "";
+
+    public RegisterResult registerRequest(String username, String password, String email) {
+        return makeRequest("POST", "/user", new RegisterRequest(username, password, email), RegisterResult.class);
+    }
+
+    public LoginResult loginRequest(String username, String password) {
+        return makeRequest("POST", "/session", new LoginRequest(username, password), LoginResult.class);
+    }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) {
         try {

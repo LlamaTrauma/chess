@@ -19,9 +19,12 @@ public class Client {
 
     public static enum handleInputReturnFlag {
         CONTINUE,
-        EXIT,
-        QUIT
+        QUIT,
+        LOOP_PRE,
+        LOOP_POST
     }
+
+    private final ServerFacade facade = new ServerFacade();
 
     public Client() {}
 
@@ -44,17 +47,15 @@ public class Client {
                 return handleInputReturnFlag.QUIT;
                 break;
             case LOGIN:
-                boolean error = handleLogin(input);
-                if (error) {
-                    return handleInputReturnFlag.EXIT;
+                if (handleLogin(input)) {
+                    return handleInputReturnFlag.LOOP_POST;
                 } else {
                     return handleInputReturnFlag.CONTINUE;
                 }
                 break;
             case REGISTER:
-                boolean error = handleRegister(input);
-                if (error) {
-                    return handleInputReturnFlag.EXIT;
+                if (handleRegister(input)) {
+                    return handleInputReturnFlag.LOOP_POST;
                 } else {
                     return handleInputReturnFlag.CONTINUE;
                 }
@@ -63,6 +64,21 @@ public class Client {
     }
 
     public boolean handleLogin(String input) {
+        String[] args = input.split("\\s+");
+        if (args.length < 3) {
+            System.out.println("Too few arguments provided\n");
+            return false;
+        } else if (args.length > 3) {
+            System.out.println("Too many arguments provided\n");
+            return false;
+        }
+        String username = args[1];
+        String password = args[2];
+        facade.loginRequest(username, password);
+        return true;
+    }
+
+    public boolean handleRegister(String input) {
         String[] args = input.split("\\s+");
         if (args.length < 4) {
             System.out.println("Too few arguments provided\n");
@@ -95,9 +111,9 @@ public class Client {
         }
         switch (prompt) {
             case HELP:
-            break;
+                break;
             case LOGOUT:
-            break;
+                break;
             case CREATE:
                 break;
             case PLAY:
