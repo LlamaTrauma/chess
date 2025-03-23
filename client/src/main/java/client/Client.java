@@ -95,13 +95,10 @@ public class Client {
         }
         switch (prompt) {
             case HELP:
-
             break;
             case LOGOUT:
-
             break;
             case CREATE:
-
                 break;
             case PLAY:
                 break;
