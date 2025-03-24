@@ -1,6 +1,9 @@
 package client;
 
+import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import requestmodel.ListGamesResult;
 import requestmodel.LoginResult;
 
@@ -150,17 +153,42 @@ public class Client {
             case LIST:
                 handleList();
                 return handleInputReturnFlag.CONTINUE;
-                break;
             case OBSERVE:
-                break;
+                handleObserve(input);
+                return handleInputReturnFlag.CONTINUE;
             default:
                 return handleInputReturnFlag.QUIT;
+        }
+    }
+
+    public void handleObserve(String input) {
+        try {
+            String[] args = input.split("\\s+");
+            if (args.length < 2) {
+                System.out.println("No game specified");
+                return;
+            }
+            int gameNum = Integer.parseInt(args[1]);
+            Integer id = listedIDs.get(gameNum);
+            if (id == null) {
+                System.out.println("Game does not exist");
+                return;
+            }
+            displayChessGame(new ChessGame(), ChessGame.TeamColor.WHITE);
+        } catch (Exception e) {
+            System.out.println("Failed to get game");
         }
     }
 
     public void handleList() {
         try {
             ListGamesResult games = facade.listRequest(authToken);
+            listedIDs.clear();
+            int i = 1;
+            for (var game : games.games()) {
+                System.out.println(String.valueOf(i) + ": " + game.gameName);
+                listedIDs.put(i, game.gameID);
+            }
         } catch (RuntimeException e) {
             System.out.println("Failed to retrieve games list");
         }
@@ -195,6 +223,7 @@ public class Client {
         }
         try {
             facade.playRequest(authToken, color, id);
+            displayChessGame(new ChessGame(), team);
         } catch (RuntimeException e) {
             System.out.println("Joining game failed");
         }
@@ -230,5 +259,47 @@ public class Client {
         System.out.println("list\n");
         System.out.println("logout\n");
         System.out.println("help\n");
+    }
+
+    private void displayChessGame(ChessGame game, ChessGame.TeamColor team) {
+        ChessBoard board = game.getBoard();
+        int row = team == ChessGame.TeamColor.WHITE ? 0 : 7;
+        int rowDiff = team == ChessGame.TeamColor.WHITE ? 1 : -1;
+        int col = team == ChessGame.TeamColor.BLACK ? 0 : 7;
+        int colDiff = team == ChessGame.TeamColor.BLACK ? 1 : -1;
+        String out = "";
+        while (row >= 0 && row <= 7) {
+            while (col >= 0 && col <= 7) {
+                ChessPiece piece = board.getPiece(new ChessPosition(row + 1, col + 1));
+                if (piece == null) {
+                    out += " ";
+                } else {
+                    switch (piece.getPieceType()) {
+                        case PAWN:
+                            out += team == ChessGame.TeamColor.WHITE ? "P" : "p";
+                            break;
+                        case KNIGHT:
+                            out += team == ChessGame.TeamColor.WHITE ? "N" : "n";
+                            break;
+                        case ROOK:
+                            out += team == ChessGame.TeamColor.WHITE ? "R" : "r";
+                            break;
+                        case BISHOP:
+                            out += team == ChessGame.TeamColor.WHITE ? "B" : "b";
+                            break;
+                        case KING:
+                            out += team == ChessGame.TeamColor.WHITE ? "K" : "k";
+                            break;
+                        case QUEEN:
+                            out += team == ChessGame.TeamColor.WHITE ? "Q" : "q";
+                            break;
+                    }
+                }
+                col += colDiff;
+            }
+            out += '\n';
+            row += rowDiff;
+        }
+        System.out.println(out);
     }
 }
