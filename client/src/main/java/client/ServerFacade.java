@@ -1,10 +1,8 @@
 package client;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
-import requestmodel.LoginRequest;
-import requestmodel.LoginResult;
-import requestmodel.RegisterRequest;
-import requestmodel.RegisterResult;
+import requestmodel.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,14 +16,30 @@ public class ServerFacade {
     private final String serverURL = "";
 
     public RegisterResult registerRequest(String username, String password, String email) {
-        return makeRequest("POST", "/user", new RegisterRequest(username, password, email), RegisterResult.class);
+        return makeRequest("POST", "/user", new RegisterRequest(username, password, email), null, RegisterResult.class);
     }
 
     public LoginResult loginRequest(String username, String password) {
-        return makeRequest("POST", "/session", new LoginRequest(username, password), LoginResult.class);
+        return makeRequest("POST", "/session", new LoginRequest(username, password), null, LoginResult.class);
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) {
+    public void logoutRequest(String authToken) {
+        makeRequest("DELETE", "/session", new LogoutRequest(authToken), authToken, LogoutResult.class);
+    }
+
+    public void createRequest(String authToken, String name) {
+        makeRequest("POST", "/game", new CreateGameRequest(name), authToken, CreateGameResult.class);
+    }
+
+    public void playRequest(String authToken, String team, int id) {
+        makeRequest("PUT", "/game", new JoinGameRequest(team, id), authToken, JoinGameResult.class);
+    }
+
+    public ListGamesResult listRequest(String authToken) {
+        return makeRequest("GET", "/game", new ListGamesRequest(authToken), authToken, ListGamesResult.class);
+    }
+
+    private <T> T makeRequest(String method, String path, Object request, String authToken, Class<T> responseClass) throws RuntimeException {
         try {
             URL url = (new URI(serverURL + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -33,13 +47,15 @@ public class ServerFacade {
             http.setDoOutput(true);
 
             writeBody(http, request);
+            if (authToken != null) {
+                http.addRequestProperty("authorization", authToken);
+            }
             http.connect();
             validateHttpSuccess(http);
 
             return readBody(http, responseClass);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return null;
+            throw new RuntimeException(e);
         }
     }
 
