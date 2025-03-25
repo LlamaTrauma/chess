@@ -49,7 +49,7 @@ public class Main {
         String input;
         Client.handleInputReturnFlag returnFlag = Client.handleInputReturnFlag.CONTINUE;
         while (returnFlag == Client.handleInputReturnFlag.CONTINUE) {
-            System.out.println("[" + client.getUsername() + "] >>> ");
+            System.out.print("[" + client.getUsername() + "] >>> ");
             input = scanner.nextLine();
             returnFlag = client.handlePostLoginInput(input);
         }

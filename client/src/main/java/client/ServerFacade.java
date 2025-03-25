@@ -44,19 +44,26 @@ public class ServerFacade {
             URL url = (new URI(serverURL + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
-            http.setDoOutput(true);
+            if(method.equalsIgnoreCase("GET")) {
+                http.setDoInput(true);
+            } else {
+                http.setDoOutput(true);
+            }
 
-            writeBody(http, request);
             if (authToken != null) {
                 http.addRequestProperty("authorization", authToken);
+            }
+            if(!method.equalsIgnoreCase("GET")) {
+                writeBody(http, request);
             }
             http.connect();
             validateHttpSuccess(http);
 
-            T response =  readBody(http, responseClass);
+            T response = readBody(http, responseClass);
             http.disconnect();
             return response;
         } catch (Exception e) {
+            e.printStackTrace(System.out);
             throw new RuntimeException(e);
         }
     }

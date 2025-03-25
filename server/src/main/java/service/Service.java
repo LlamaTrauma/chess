@@ -54,7 +54,7 @@ public class Service {
             throw new RequestException("Team color is null");
         }
 
-        if (!req.playerColor().equals("WHITE") && !req.playerColor().equals("BLACK")) {
+        if (!req.playerColor().equalsIgnoreCase("WHITE") && !req.playerColor().equalsIgnoreCase("BLACK")) {
             throw new RequestException("Team color " + req.playerColor() + " is invalid");
         }
 

@@ -7,6 +7,7 @@ import chess.ChessPosition;
 import requestmodel.ListGamesResult;
 import requestmodel.LoginResult;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Client {
@@ -37,7 +38,7 @@ public class Client {
 
     private String username;
     private String authToken;
-    private Map<Integer, Integer> listedIDs;
+    private final Map<Integer, Integer> listedIDs = new HashMap<>();
 
     public String getUsername() {
         return username;
@@ -192,6 +193,8 @@ public class Client {
                 listedIDs.put(i, game.gameID);
             }
         } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace(System.out);
             System.out.println("Failed to retrieve games list");
         }
     }
