@@ -49,7 +49,7 @@ public class Client {
         preLoginPrompt prompt;
         try {
             String command = input.split("\\s+")[0];
-            prompt = preLoginPrompt.valueOf(input.toUpperCase());
+            prompt = preLoginPrompt.valueOf(command.toUpperCase());
         } catch (IllegalArgumentException ignored) {
             System.out.println("Invalid input\n");
             return handleInputReturnFlag.CONTINUE;
@@ -91,7 +91,7 @@ public class Client {
         String password = args[2];
         try {
             LoginResult result = facade.loginRequest(username, password);
-            username = result.username();
+            this.username = result.username();
             authToken = result.authToken();
         } catch (RuntimeException e) {
             System.out.println("error registering");
@@ -114,7 +114,9 @@ public class Client {
         String email = args[3];
         try {
             facade.registerRequest(username, password, email);
+            this.username = username;
         } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
             System.out.println("error registering");
             return false;
         }
@@ -132,7 +134,7 @@ public class Client {
         postLoginPrompt prompt;
         try {
             String command = input.split("\\s+")[0];
-            prompt = postLoginPrompt.valueOf(input.toUpperCase());
+            prompt = postLoginPrompt.valueOf(command.toUpperCase());
         } catch (IllegalArgumentException ignored) {
             System.out.println("Invalid input\n");
             return handleInputReturnFlag.CONTINUE;
@@ -240,6 +242,8 @@ public class Client {
         try {
             facade.createRequest(authToken, name);
         } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace(System.out);
             System.out.println("Creating game failed");
         }
     }

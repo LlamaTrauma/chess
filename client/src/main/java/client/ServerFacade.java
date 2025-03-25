@@ -13,7 +13,7 @@ import java.net.URI;
 import java.net.URL;
 
 public class ServerFacade {
-    private final String serverURL = "";
+    private final String serverURL = "http://localhost:8080";
 
     public RegisterResult registerRequest(String username, String password, String email) {
         return makeRequest("POST", "/user", new RegisterRequest(username, password, email), null, RegisterResult.class);
@@ -53,7 +53,9 @@ public class ServerFacade {
             http.connect();
             validateHttpSuccess(http);
 
-            return readBody(http, responseClass);
+            T response =  readBody(http, responseClass);
+            http.disconnect();
+            return response;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
