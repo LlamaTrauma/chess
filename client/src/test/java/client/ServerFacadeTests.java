@@ -14,9 +14,13 @@ public class ServerFacadeTests {
     @BeforeAll
     public static void init() {
         server = new Server();
-        var port = server.run(0);
+        var port = server.run(8080);
         System.out.println("Started test HTTP server on " + port);
         facade = new ServerFacade();
+    }
+
+    @BeforeEach
+    public void clearDB () {
         try {
             DAO.GAME_DAO.deleteGames();
             DAO.AUTH_DAO.deleteAuths();
@@ -117,7 +121,7 @@ public class ServerFacadeTests {
             facade.registerRequest("a", "b", "c");
             String auth = facade.loginRequest("a", "b").authToken();
             facade.createRequest(auth, "game");
-            facade.createRequest(auth, "game");
+            facade.createRequest(auth, "asdddddddddddddddddddddddddddddddddsssssssssssssssssssssssssssssssaaaaaaaaaaaaaaaaaaaaaaaaa");
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(true);

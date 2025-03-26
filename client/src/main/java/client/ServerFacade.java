@@ -63,7 +63,6 @@ public class ServerFacade {
             http.disconnect();
             return response;
         } catch (Exception e) {
-            e.printStackTrace(System.out);
             throw new RuntimeException(e);
         }
     }
