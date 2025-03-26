@@ -6,6 +6,7 @@ import chess.ChessPiece;
 import chess.ChessPosition;
 import model.ListGamesResult;
 import model.LoginResult;
+import requestmodel.RegisterResult;
 import ui.EscapeSequences;
 
 import java.util.HashMap;
@@ -47,15 +48,46 @@ public class Client {
 
     public Client() {}
 
-    public HandleInputReturnFlag handlePreLoginInput(String input) {
-        PreLoginPrompt prompt;
-        try {
-            String command = input.split("\\s+")[0];
-            prompt = PreLoginPrompt.valueOf(command.toUpperCase());
-        } catch (IllegalArgumentException ignored) {
-            System.out.println("Invalid input\n");
-            return HandleInputReturnFlag.CONTINUE;
+    private PostLoginPrompt translateInputPostLogin (String input) {
+        if (input.contains("help")) {
+            return PostLoginPrompt.HELP;
         }
+        if (input.contains("list games")) {
+            return PostLoginPrompt.LIST;
+        }
+        if (input.contains("play game")) {
+            return PostLoginPrompt.PLAY;
+        }
+        if (input.contains("logout")) {
+            return PostLoginPrompt.LOGOUT;
+        }
+        if (input.contains("observe game")) {
+            return PostLoginPrompt.OBSERVE;
+        }
+        if (input.contains("create game")) {
+            return PostLoginPrompt.CREATE;
+        }
+        return null;
+    }
+
+    private PreLoginPrompt translateInputPreLogin (String input) {
+        if (input.contains("help")) {
+            return PreLoginPrompt.HELP;
+        }
+        if (input.contains("quit")) {
+            return PreLoginPrompt.QUIT;
+        }
+        if (input.contains("login")) {
+            return PreLoginPrompt.LOGIN;
+        }
+        if (input.contains("register")) {
+            return PreLoginPrompt.REGISTER;
+        }
+        return null;
+    }
+
+    public HandleInputReturnFlag handlePreLoginInput(String input) {
+        PreLoginPrompt prompt = translateInputPreLogin(input);
         switch (prompt) {
             case HELP:
                 handlePreLoginHelp();
@@ -75,8 +107,9 @@ public class Client {
                 } else {
                     return HandleInputReturnFlag.CONTINUE;
                 }
-            default:
-                return HandleInputReturnFlag.QUIT;
+            case null:
+                System.out.println("invalid input");
+                return HandleInputReturnFlag.CONTINUE;
         }
     }
 
@@ -96,7 +129,7 @@ public class Client {
             this.username = result.username();
             authToken = result.authToken();
         } catch (RuntimeException e) {
-            System.out.println("error registering");
+            System.out.println("error logging in");
             return false;
         }
         return true;
@@ -115,8 +148,9 @@ public class Client {
         String password = args[2];
         String email = args[3];
         try {
-            facade.registerRequest(username, password, email);
-            this.username = username;
+            RegisterResult res = facade.registerRequest(username, password, email);
+            this.username = res.username();
+            this.authToken = res.authToken();
         } catch (RuntimeException e) {
             System.out.println("error registering");
             return false;
@@ -132,14 +166,7 @@ public class Client {
     }
 
     public HandleInputReturnFlag handlePostLoginInput(String input) {
-        PostLoginPrompt prompt;
-        try {
-            String command = input.split("\\s+")[0];
-            prompt = PostLoginPrompt.valueOf(command.toUpperCase());
-        } catch (IllegalArgumentException ignored) {
-            System.out.println("Invalid input\n");
-            return HandleInputReturnFlag.CONTINUE;
-        }
+        PostLoginPrompt prompt = translateInputPostLogin(input);
         switch (prompt) {
             case HELP:
                 handlePostLoginHelp();
@@ -159,19 +186,28 @@ public class Client {
             case OBSERVE:
                 handleObserve(input);
                 return HandleInputReturnFlag.CONTINUE;
-            default:
-                return HandleInputReturnFlag.QUIT;
+            case null:
+                System.out.println("invalid input");
+                return HandleInputReturnFlag.CONTINUE;
         }
     }
 
     public void handleObserve(String input) {
         try {
             String[] args = input.split("\\s+");
-            if (args.length < 2) {
+            if (args.length < 3) {
                 System.out.println("No game specified");
                 return;
             }
-            int gameNum = Integer.parseInt(args[1]);
+            if (args.length > 3) {
+                System.out.println("too many arguments");
+                return;
+            }
+            int gameNum = 0;
+            try { gameNum = Integer.parseInt(args[2]); } catch (NumberFormatException e) {
+                System.out.print("Couldn't parse game number");
+                return;
+            }
             Integer id = listedIDs.get(gameNum);
             if (id == null) {
                 System.out.println("Game does not exist");
@@ -202,12 +238,16 @@ public class Client {
 
     public void handlePlay(String input) {
         String[] args = input.split("\\s+");
-        if (args.length < 3) {
+        if (args.length < 4) {
             System.out.println("Too few inputs");
             return;
         }
-        String number = args[1];
-        String color = args[2];
+        if (args.length > 4) {
+            System.out.println("Too many inputs");
+            return;
+        }
+        String number = args[2];
+        String color = args[3];
         ChessGame.TeamColor team = null;
         if (color.equalsIgnoreCase("white")) {
             team = ChessGame.TeamColor.WHITE;
@@ -238,11 +278,15 @@ public class Client {
 
     public void handleCreate(String input) {
         String[] args = input.split("\\s+");
-        if (args.length < 2) {
+        if (args.length < 3) {
             System.out.println("Too few inputs");
             return;
         }
-        String name = args[1];
+        if (args.length > 3) {
+            System.out.println("Too many inputs");
+            return;
+        }
+        String name = args[2];
         try {
             facade.createRequest(authToken, name);
         } catch (RuntimeException e) {
@@ -261,10 +305,10 @@ public class Client {
     }
 
     public void handlePostLoginHelp() {
-        System.out.println("create <game name>\n");
-        System.out.println("play <game number> <color>\n");
-        System.out.println("observe <game number>\n");
-        System.out.println("list\n");
+        System.out.println("create game <game name>\n");
+        System.out.println("play game <game number> <color>\n");
+        System.out.println("observe game <game number>\n");
+        System.out.println("list games\n");
         System.out.println("logout\n");
         System.out.println("help\n");
     }
