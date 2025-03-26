@@ -11,14 +11,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Client {
-    public static enum preLoginPrompt {
+    public static enum PreLoginPrompt {
         HELP,
         QUIT,
         LOGIN,
         REGISTER
     }
 
-    public static enum postLoginPrompt {
+    public static enum PostLoginPrompt {
         HELP,
         LOGOUT,
         CREATE,
@@ -27,7 +27,7 @@ public class Client {
         OBSERVE
     }
 
-    public static enum handleInputReturnFlag {
+    public static enum HandleInputReturnFlag {
         CONTINUE,
         QUIT,
         LOOP_PRE,
@@ -46,36 +46,36 @@ public class Client {
 
     public Client() {}
 
-    public handleInputReturnFlag handlePreLoginInput(String input) {
-        preLoginPrompt prompt;
+    public HandleInputReturnFlag handlePreLoginInput(String input) {
+        PreLoginPrompt prompt;
         try {
             String command = input.split("\\s+")[0];
-            prompt = preLoginPrompt.valueOf(command.toUpperCase());
+            prompt = PreLoginPrompt.valueOf(command.toUpperCase());
         } catch (IllegalArgumentException ignored) {
             System.out.println("Invalid input\n");
-            return handleInputReturnFlag.CONTINUE;
+            return HandleInputReturnFlag.CONTINUE;
         }
         switch (prompt) {
             case HELP:
                 handlePreLoginHelp();
-                return handleInputReturnFlag.CONTINUE;
+                return HandleInputReturnFlag.CONTINUE;
             case QUIT:
                 System.out.println("goodbye");
-                return handleInputReturnFlag.QUIT;
+                return HandleInputReturnFlag.QUIT;
             case LOGIN:
                 if (handleLogin(input)) {
-                    return handleInputReturnFlag.LOOP_POST;
+                    return HandleInputReturnFlag.LOOP_POST;
                 } else {
-                    return handleInputReturnFlag.CONTINUE;
+                    return HandleInputReturnFlag.CONTINUE;
                 }
             case REGISTER:
                 if (handleRegister(input)) {
-                    return handleInputReturnFlag.LOOP_POST;
+                    return HandleInputReturnFlag.LOOP_POST;
                 } else {
-                    return handleInputReturnFlag.CONTINUE;
+                    return HandleInputReturnFlag.CONTINUE;
                 }
             default:
-                return handleInputReturnFlag.QUIT;
+                return HandleInputReturnFlag.QUIT;
         }
     }
 
@@ -131,36 +131,36 @@ public class Client {
         System.out.println("help\n");
     }
 
-    public handleInputReturnFlag handlePostLoginInput(String input) {
-        postLoginPrompt prompt;
+    public HandleInputReturnFlag handlePostLoginInput(String input) {
+        PostLoginPrompt prompt;
         try {
             String command = input.split("\\s+")[0];
-            prompt = postLoginPrompt.valueOf(command.toUpperCase());
+            prompt = PostLoginPrompt.valueOf(command.toUpperCase());
         } catch (IllegalArgumentException ignored) {
             System.out.println("Invalid input\n");
-            return handleInputReturnFlag.CONTINUE;
+            return HandleInputReturnFlag.CONTINUE;
         }
         switch (prompt) {
             case HELP:
                 handlePostLoginHelp();
-                return handleInputReturnFlag.CONTINUE;
+                return HandleInputReturnFlag.CONTINUE;
             case LOGOUT:
                 handleLogout();
-                return handleInputReturnFlag.LOOP_PRE;
+                return HandleInputReturnFlag.LOOP_PRE;
             case CREATE:
                 handleCreate(input);
-                return handleInputReturnFlag.CONTINUE;
+                return HandleInputReturnFlag.CONTINUE;
             case PLAY:
                 handlePlay(input);
-                return handleInputReturnFlag.CONTINUE;
+                return HandleInputReturnFlag.CONTINUE;
             case LIST:
                 handleList();
-                return handleInputReturnFlag.CONTINUE;
+                return HandleInputReturnFlag.CONTINUE;
             case OBSERVE:
                 handleObserve(input);
-                return handleInputReturnFlag.CONTINUE;
+                return HandleInputReturnFlag.CONTINUE;
             default:
-                return handleInputReturnFlag.QUIT;
+                return HandleInputReturnFlag.QUIT;
         }
     }
 

@@ -3,10 +3,10 @@ import client.Client;
 
 import java.util.Scanner;
 
-import static client.Client.handleInputReturnFlag.*;
+import static client.Client.HandleInputReturnFlag.*;
 
 public class Main {
-    private static final Client client = new Client();
+    private static final Client CLIENT = new Client();
 
     public static void main(String[] args) {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
@@ -15,7 +15,7 @@ public class Main {
 //        Server myServer = new Server();
 //        myServer.run(8080);
 
-        Client.handleInputReturnFlag returnFlag = LOOP_PRE;
+        Client.HandleInputReturnFlag returnFlag = LOOP_PRE;
         while(returnFlag != QUIT) {
             if (returnFlag == LOOP_PRE) {
                 do {
@@ -31,26 +31,26 @@ public class Main {
         }
     }
 
-    private static Client.handleInputReturnFlag doPreLoginLoop() {
+    private static Client.HandleInputReturnFlag doPreLoginLoop() {
         Scanner scanner = new Scanner(System.in);
         String input;
-        Client.handleInputReturnFlag returnFlag = Client.handleInputReturnFlag.CONTINUE;
-        while (returnFlag == Client.handleInputReturnFlag.CONTINUE) {
+        Client.HandleInputReturnFlag returnFlag = Client.HandleInputReturnFlag.CONTINUE;
+        while (returnFlag == Client.HandleInputReturnFlag.CONTINUE) {
             System.out.print("[LOGGED OUT] >>> ");
             input = scanner.nextLine();
-            returnFlag = client.handlePreLoginInput(input);
+            returnFlag = CLIENT.handlePreLoginInput(input);
         }
         return returnFlag;
     }
 
-    private static Client.handleInputReturnFlag doPostLoginLoop() {
+    private static Client.HandleInputReturnFlag doPostLoginLoop() {
         Scanner scanner = new Scanner(System.in);
         String input;
-        Client.handleInputReturnFlag returnFlag = Client.handleInputReturnFlag.CONTINUE;
-        while (returnFlag == Client.handleInputReturnFlag.CONTINUE) {
-            System.out.print("[" + client.getUsername() + "] >>> ");
+        Client.HandleInputReturnFlag returnFlag = Client.HandleInputReturnFlag.CONTINUE;
+        while (returnFlag == Client.HandleInputReturnFlag.CONTINUE) {
+            System.out.print("[" + CLIENT.getUsername() + "] >>> ");
             input = scanner.nextLine();
-            returnFlag = client.handlePostLoginInput(input);
+            returnFlag = CLIENT.handlePostLoginInput(input);
         }
         return returnFlag;
     }
