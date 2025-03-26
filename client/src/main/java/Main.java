@@ -1,5 +1,6 @@
 import chess.*;
 import client.Client;
+import server.Server;
 
 import java.util.Scanner;
 
@@ -12,8 +13,8 @@ public class Main {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         System.out.println("♕ 240 Chess Client: " + piece);
 
-//        Server myServer = new Server();
-//        myServer.run(8080);
+        Server myServer = new Server();
+        myServer.run(8080);
 
         Client.HandleInputReturnFlag returnFlag = LOOP_PRE;
         while(returnFlag != QUIT) {

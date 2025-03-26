@@ -6,6 +6,7 @@ import chess.ChessPiece;
 import chess.ChessPosition;
 import model.ListGamesResult;
 import model.LoginResult;
+import ui.EscapeSequences;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -117,7 +118,6 @@ public class Client {
             facade.registerRequest(username, password, email);
             this.username = username;
         } catch (RuntimeException e) {
-            System.out.println(e.getMessage());
             System.out.println("error registering");
             return false;
         }
@@ -273,41 +273,47 @@ public class Client {
         ChessBoard board = game.getBoard();
         int row = team == ChessGame.TeamColor.BLACK ? 0 : 7;
         int rowDiff = team == ChessGame.TeamColor.BLACK ? 1 : -1;
-        String out = "";
+        String row_s = team == ChessGame.TeamColor.WHITE ? "    a   b  c   d   e   f  g   h    " : "    h   g  f   e   d   c  b   a    ";
+        row_s = EscapeSequences.SET_BG_COLOR_BLACK + row_s + EscapeSequences.RESET_BG_COLOR + "\n";
+        String out = row_s;
         while (row >= 0 && row <= 7) {
             int col = team == ChessGame.TeamColor.BLACK ? 7 : 0;
             int colDiff = team == ChessGame.TeamColor.BLACK ? -1 : 1;
+            out += EscapeSequences.SET_BG_COLOR_BLACK + " " + String.valueOf(row + 1) + " ";
             while (col >= 0 && col <= 7) {
                 ChessPiece piece = board.getPiece(new ChessPosition(row + 1, col + 1));
+                out += ((row % 2) + col) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY : EscapeSequences.SET_BG_COLOR_DARK_GREY;
                 if (piece == null) {
-                    out += " ";
+                    out += EscapeSequences.EMPTY;
                 } else {
                     switch (piece.getPieceType()) {
                         case PAWN:
-                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "P" : "p";
+                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_PAWN : EscapeSequences.BLACK_PAWN;
                             break;
                         case KNIGHT:
-                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "N" : "n";
+                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_KNIGHT : EscapeSequences.BLACK_KNIGHT;
                             break;
                         case ROOK:
-                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "R" : "r";
+                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_ROOK : EscapeSequences.BLACK_ROOK;
                             break;
                         case BISHOP:
-                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "B" : "b";
+                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_BISHOP : EscapeSequences.BLACK_BISHOP;
                             break;
                         case KING:
-                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "K" : "k";
+                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_KING : EscapeSequences.BLACK_KING;
                             break;
                         case QUEEN:
-                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "Q" : "q";
+                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_QUEEN : EscapeSequences.BLACK_QUEEN;
                             break;
                     }
                 }
                 col += colDiff;
             }
-            out += '\n';
+            out += EscapeSequences.SET_BG_COLOR_BLACK + " " + String.valueOf(row + 1) + " ";
+            out += EscapeSequences.RESET_BG_COLOR + " \n";
             row += rowDiff;
         }
+        out += row_s;
         System.out.println(out);
     }
 }
