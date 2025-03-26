@@ -16,7 +16,7 @@ import java.net.URL;
 public class ServerFacade {
     private final String serverURL;
 
-    public ServerFacade (int port) {
+    ServerFacade (int port) {
         serverURL = "http://localhost:" + String.valueOf(port);
     }
 
