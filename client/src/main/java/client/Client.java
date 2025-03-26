@@ -191,6 +191,7 @@ public class Client {
             for (var game : games.games()) {
                 System.out.println(String.valueOf(i) + ": " + game.gameName);
                 listedIDs.put(i, game.gameID);
+                i += 1;
             }
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
@@ -270,12 +271,12 @@ public class Client {
 
     private void displayChessGame(ChessGame game, ChessGame.TeamColor team) {
         ChessBoard board = game.getBoard();
-        int row = team == ChessGame.TeamColor.WHITE ? 0 : 7;
-        int rowDiff = team == ChessGame.TeamColor.WHITE ? 1 : -1;
-        int col = team == ChessGame.TeamColor.BLACK ? 0 : 7;
-        int colDiff = team == ChessGame.TeamColor.BLACK ? 1 : -1;
+        int row = team == ChessGame.TeamColor.BLACK ? 0 : 7;
+        int rowDiff = team == ChessGame.TeamColor.BLACK ? 1 : -1;
         String out = "";
         while (row >= 0 && row <= 7) {
+            int col = team == ChessGame.TeamColor.BLACK ? 7 : 0;
+            int colDiff = team == ChessGame.TeamColor.BLACK ? -1 : 1;
             while (col >= 0 && col <= 7) {
                 ChessPiece piece = board.getPiece(new ChessPosition(row + 1, col + 1));
                 if (piece == null) {
@@ -283,22 +284,22 @@ public class Client {
                 } else {
                     switch (piece.getPieceType()) {
                         case PAWN:
-                            out += team == ChessGame.TeamColor.WHITE ? "P" : "p";
+                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "P" : "p";
                             break;
                         case KNIGHT:
-                            out += team == ChessGame.TeamColor.WHITE ? "N" : "n";
+                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "N" : "n";
                             break;
                         case ROOK:
-                            out += team == ChessGame.TeamColor.WHITE ? "R" : "r";
+                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "R" : "r";
                             break;
                         case BISHOP:
-                            out += team == ChessGame.TeamColor.WHITE ? "B" : "b";
+                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "B" : "b";
                             break;
                         case KING:
-                            out += team == ChessGame.TeamColor.WHITE ? "K" : "k";
+                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "K" : "k";
                             break;
                         case QUEEN:
-                            out += team == ChessGame.TeamColor.WHITE ? "Q" : "q";
+                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? "Q" : "q";
                             break;
                     }
                 }

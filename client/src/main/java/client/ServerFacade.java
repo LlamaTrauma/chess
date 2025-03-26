@@ -27,8 +27,8 @@ public class ServerFacade {
         makeRequest("DELETE", "/session", new LogoutRequest(authToken), authToken, LogoutResult.class);
     }
 
-    public void createRequest(String authToken, String name) {
-        makeRequest("POST", "/game", new CreateGameRequest(name), authToken, CreateGameResult.class);
+    public CreateGameResult createRequest(String authToken, String name) {
+        return makeRequest("POST", "/game", new CreateGameRequest(name), authToken, CreateGameResult.class);
     }
 
     public void playRequest(String authToken, String team, int id) {
