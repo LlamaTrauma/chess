@@ -1,6 +1,7 @@
 package server;
 
 import dataaccess.DataAccessException;
+import model.ResponseBody;
 import requestmodel.*;
 import service.RequestException;
 import service.TakenException;

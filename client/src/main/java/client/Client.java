@@ -4,8 +4,8 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
-import requestmodel.ListGamesResult;
-import requestmodel.LoginResult;
+import model.ListGamesResult;
+import model.LoginResult;
 
 import java.util.HashMap;
 import java.util.Map;

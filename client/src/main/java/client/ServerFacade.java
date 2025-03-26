@@ -1,7 +1,8 @@
 package client;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
+import model.ListGamesResult;
+import model.LoginResult;
 import requestmodel.*;
 
 import java.io.IOException;

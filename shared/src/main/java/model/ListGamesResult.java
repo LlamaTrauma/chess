@@ -1,6 +1,4 @@
-package requestmodel;
-
-import model.GameMetadata;
+package model;
 
 import java.util.ArrayList;
 

@@ -2,7 +2,6 @@ package client;
 
 import dataaccess.DAO;
 import org.junit.jupiter.api.*;
-import requestmodel.LoginResult;
 import server.Server;
 
 

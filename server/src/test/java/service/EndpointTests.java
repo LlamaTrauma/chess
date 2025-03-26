@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DAO;
+import model.ListGamesResult;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

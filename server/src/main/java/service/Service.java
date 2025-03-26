@@ -3,6 +3,8 @@ package service;
 import chess.ChessGame;
 import dataaccess.DAO;
 import dataaccess.DataAccessException;
+import model.ListGamesResult;
+import model.LoginResult;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 import requestmodel.*;

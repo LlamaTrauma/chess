@@ -1,4 +1,4 @@
-package requestmodel;
+package model;
 
 public interface ResponseBody {
 }

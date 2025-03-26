@@ -1,5 +1,7 @@
 package requestmodel;
 
+import model.ResponseBody;
+
 public class StandardResponse implements ResponseBody {
     public String message;
 
