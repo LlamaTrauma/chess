@@ -14,7 +14,11 @@ import java.net.URI;
 import java.net.URL;
 
 public class ServerFacade {
-    private final String serverURL = "http://localhost:8080";
+    private final String serverURL;
+
+    public ServerFacade (int port) {
+        serverURL = "http://localhost:" + String.valueOf(port);
+    }
 
     public RegisterResult registerRequest(String username, String password, String email) {
         return makeRequest("POST", "/user", new RegisterRequest(username, password, email), null, RegisterResult.class);

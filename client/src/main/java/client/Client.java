@@ -34,7 +34,7 @@ public class Client {
         LOOP_POST
     }
 
-    private final ServerFacade facade = new ServerFacade();
+    private final ServerFacade facade = new ServerFacade(8080);
 
     private String username;
     private String authToken;
