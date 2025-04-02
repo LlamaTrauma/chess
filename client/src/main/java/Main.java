@@ -26,6 +26,10 @@ public class Main {
                 do {
                     returnFlag = doPostLoginLoop();
                 } while (returnFlag == CONTINUE);
+            } else if (returnFlag == LOOP_GAME) {
+                do {
+                    returnFlag = doPlayingLoop();
+                } while (returnFlag == CONTINUE);
             } else {
                 returnFlag = QUIT;
             }
@@ -52,6 +56,18 @@ public class Main {
             System.out.print("[" + CLIENT.getUsername() + "] >>> ");
             input = scanner.nextLine();
             returnFlag = CLIENT.handlePostLoginInput(input);
+        }
+        return returnFlag;
+    }
+
+    private static Client.HandleInputReturnFlag doPlayingLoop() {
+        Scanner scanner = new Scanner(System.in);
+        String input;
+        Client.HandleInputReturnFlag returnFlag = Client.HandleInputReturnFlag.CONTINUE;
+        while (returnFlag == Client.HandleInputReturnFlag.CONTINUE) {
+            System.out.print("[" + CLIENT.getUsername() + "] >>> ");
+            input = scanner.nextLine();
+            returnFlag = CLIENT.handlePlayingInput(input);
         }
         return returnFlag;
     }

@@ -29,11 +29,21 @@ public class Client {
         OBSERVE
     }
 
+    public static enum PlayingPrompt {
+        HELP,
+        REDRAW,
+        LEAVE,
+        MOVE,
+        RESIGN,
+        HIGHLIGHT
+    }
+
     public static enum HandleInputReturnFlag {
         CONTINUE,
         QUIT,
         LOOP_PRE,
-        LOOP_POST
+        LOOP_POST,
+        LOOP_GAME
     }
 
     private final ServerFacade facade = new ServerFacade(8080);
@@ -47,6 +57,25 @@ public class Client {
     }
 
     public Client() {}
+
+    private PlayingPrompt translateInputPlaying (String input) {
+        if (input.contains("help")) {
+            return PlayingPrompt.HELP;
+        }
+        if (input.contains("redraw chess board")) {
+            return PlayingPrompt.REDRAW;
+        }
+        if (input.contains("make move")) {
+            return PlayingPrompt.MOVE;
+        }
+        if (input.contains("resign")) {
+            return PlayingPrompt.RESIGN;
+        }
+        if (input.contains("highlight legal moves")) {
+            return PlayingPrompt.HIGHLIGHT;
+        }
+        return null;
+    }
 
     private PostLoginPrompt translateInputPostLogin (String input) {
         if (input.contains("help")) {
@@ -107,6 +136,33 @@ public class Client {
                 } else {
                     return HandleInputReturnFlag.CONTINUE;
                 }
+            case null:
+                System.out.println("invalid input");
+                return HandleInputReturnFlag.CONTINUE;
+        }
+    }
+
+    public HandleInputReturnFlag handlePlayingInput(String input) {
+        PlayingPrompt prompt = translateInputPlaying(input);
+        switch (prompt) {
+            case HELP:
+                handlePlayingHelp();
+                return HandleInputReturnFlag.CONTINUE;
+            case REDRAW:
+                handleRedraw();
+                return HandleInputReturnFlag.CONTINUE;
+            case REDRAW:
+                handleRedraw();
+                return HandleInputReturnFlag.CONTINUE;
+            case LEAVE:
+                handleLeave();
+                return HandleInputReturnFlag.LOOP_POST;
+            case RESIGN:
+                handleResign();
+                return HandleInputReturnFlag.CONTINUE;
+            case HIGHLIGHT:
+                handleHighlight(input);
+                return HandleInputReturnFlag.CONTINUE;
             case null:
                 System.out.println("invalid input");
                 return HandleInputReturnFlag.CONTINUE;
@@ -225,7 +281,12 @@ public class Client {
             listedIDs.clear();
             int i = 1;
             for (var game : games.games()) {
-                System.out.println(String.valueOf(i) + ": " + game.gameName);
+                String gamestr = String.valueOf(i) + ": " + game.gameName;
+                gamestr += "\n    white: ";
+                gamestr += game.whiteUsername == null ? "<available>" : game.whiteUsername;
+                gamestr += "\n    black: ";
+                gamestr += game.blackUsername == null ? "<available>" : game.blackUsername;
+                System.out.println(gamestr);
                 listedIDs.put(i, game.gameID);
                 i += 1;
             }
@@ -326,7 +387,7 @@ public class Client {
             out += EscapeSequences.SET_BG_COLOR_BLACK + " " + String.valueOf(row + 1) + " ";
             while (col >= 0 && col <= 7) {
                 ChessPiece piece = board.getPiece(new ChessPosition(row + 1, col + 1));
-                out += ((row % 2) + col) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_LIGHT_GREY : EscapeSequences.SET_BG_COLOR_DARK_GREY;
+                out += ((row % 2) + col) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_DARK_GREY : EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
                 if (piece == null) {
                     out += EscapeSequences.EMPTY;
                 } else {
