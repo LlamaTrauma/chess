@@ -1,15 +1,21 @@
 package server;
 
 import com.google.gson.Gson;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import requestmodel.*;
 import spark.*;
+import websocket.commands.UserGameCommand;
 
+@WebSocket
 public class Server {
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/ws", Server.class);
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", (request, response) -> {
@@ -70,5 +76,12 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+
+    @OnWebSocketMessage
+    public void onMessage(Session session, String message) throws Exception {
+        UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
+        UserGameCommand.CommandType type = command.getCommandType();
+
     }
 }

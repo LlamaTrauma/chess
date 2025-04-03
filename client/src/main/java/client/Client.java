@@ -52,6 +52,8 @@ public class Client {
     private String authToken;
     private final Map<Integer, Integer> listedIDs = new HashMap<>();
 
+    private ChessGame current_game;
+
     public String getUsername() {
         return username;
     }
@@ -151,8 +153,8 @@ public class Client {
             case REDRAW:
                 handleRedraw();
                 return HandleInputReturnFlag.CONTINUE;
-            case REDRAW:
-                handleRedraw();
+            case MOVE:
+                handleMove();
                 return HandleInputReturnFlag.CONTINUE;
             case LEAVE:
                 handleLeave();
@@ -167,6 +169,15 @@ public class Client {
                 System.out.println("invalid input");
                 return HandleInputReturnFlag.CONTINUE;
         }
+    }
+
+    public void handlePlayingHelp() {
+        System.out.println("help");
+        System.out.println("redraw chess board");
+        System.out.println("leave");
+        System.out.println("make move <piece> <end position>");
+        System.out.println("resign");
+        System.out.println("highlight legal move <piece>");
     }
 
     public boolean handleLogin(String input) {
