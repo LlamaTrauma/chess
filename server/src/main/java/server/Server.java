@@ -4,8 +4,11 @@ import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import requestmodel.*;
+import service.WebsocketHandler;
 import spark.*;
-import websocket.commands.UserGameCommand;
+import websocket.commands.*;
+
+import javax.lang.model.type.NullType;
 
 @WebSocket
 public class Server {
@@ -81,7 +84,29 @@ public class Server {
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
         UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
-        UserGameCommand.CommandType type = command.getCommandType();
-
+        UserGameCommand.CommandType type = UserGameCommand.CommandType.CONNECT;
+        try {
+            type = command.getCommandType();
+        } catch (Exception e) {
+            //invalid command
+        }
+        try {
+            switch (type) {
+                case CONNECT:
+                    WebsocketHandler.handleConnectGameCommand(session, new Gson().fromJson(message, ConnectCommand.class));
+                    break;
+                case MAKE_MOVE:
+                    WebsocketHandler.handleMoveGameCommand(session, new Gson().fromJson(message, MoveCommand.class));
+                    break;
+                case LEAVE:
+                    WebsocketHandler.handleLeaveGameCommand(session, new Gson().fromJson(message, LeaveCommand.class));
+                    break;
+                case RESIGN:
+                    WebsocketHandler.handleResignGameCommand(session, new Gson().fromJson(message, ResignCommand.class));
+                    break;
+            }
+        } catch (Exception e) {
+            // error
+        }
     }
 }
