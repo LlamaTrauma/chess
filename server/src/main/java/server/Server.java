@@ -1,11 +1,13 @@
 package server;
 
 import com.google.gson.Gson;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
-import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.*;
+import org.eclipse.jetty.websocket.api.*;
 import requestmodel.*;
 import service.WebsocketHandler;
 import spark.*;
+import spark.Spark;
 import websocket.commands.*;
 
 import javax.lang.model.type.NullType;
@@ -83,12 +85,14 @@ public class Server {
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
+        session.getRemote();
         UserGameCommand command = new Gson().fromJson(message, UserGameCommand.class);
         UserGameCommand.CommandType type = UserGameCommand.CommandType.CONNECT;
+
         try {
             type = command.getCommandType();
         } catch (Exception e) {
-            //invalid command
+            WebsocketHandler.handleInvalidCommand(session, message);
         }
         try {
             switch (type) {
@@ -106,7 +110,7 @@ public class Server {
                     break;
             }
         } catch (Exception e) {
-            // error
+            WebsocketHandler.handleError(e.getMessage());
         }
     }
 }
