@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.DAO;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
@@ -8,27 +9,11 @@ import java.util.ArrayList;
 
 public class ServerGame {
     public GameData game;
-    ArrayList<Session> connectedPlayers;
-    Session host;
-    int gameID;
+    ArrayList<Session> connectedSessions;
 
-    public ServerGame() throws Exception {
-        connectedPlayers = new ArrayList<>();
-        game = DAO.GAME_DAO.readGame(gameID);
-    }
-
-    public boolean sendHostMessage (String message) {
-        if (host == null) {
-            host = connectedPlayers.getFirst();
-        }
-        while (!connectedPlayers.isEmpty()) {
-            if (sendMessage(host, message)) {
-                return true;
-            } else {
-                connectedPlayers.remove(host);
-            }
-        }
-        return false;
+    public ServerGame(GameData data) throws Exception {
+        connectedSessions = new ArrayList<>();
+        game = data;
     }
 
     public boolean sendMessage(Session session, String message) {
@@ -41,12 +26,23 @@ public class ServerGame {
     }
 
     public void sendAllMessage(String message) {
-        for (var session: new ArrayList<>(connectedPlayers)) {
+        for (var session: new ArrayList<>(connectedSessions)) {
             try {
                 session.getRemote().sendString(message);
             } catch (Exception e) {
-                connectedPlayers.remove(session);
+                connectedSessions.remove(session);
             }
         }
     }
+
+    public ChessGame.TeamColor userTeam(String username) {
+        if (username.equals(game.metadata.blackUsername)) {
+            return ChessGame.TeamColor.BLACK;
+        }
+        if (username.equals(game.metadata.whiteUsername)) {
+            return ChessGame.TeamColor.WHITE;
+        }
+        return null;
+    }
+
 }

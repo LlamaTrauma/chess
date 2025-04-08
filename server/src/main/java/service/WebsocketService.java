@@ -2,6 +2,8 @@ package service;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import dataaccess.DAO;
+import model.GameData;
 import websocket.commands.ConnectCommand;
 import websocket.commands.LeaveCommand;
 import websocket.commands.MoveCommand;
@@ -10,7 +12,6 @@ import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class WebsocketService {
@@ -21,10 +22,25 @@ public class WebsocketService {
         games = new HashMap<Integer, ServerGame>();
     }
 
-    public void connectGame (Session session, ConnectCommand comm) {
-        ServerGame game = games.get(comm.getGameID());
-        if (game == null) {
-            throw new GameDoesNotExist("Game " + String.valueOf(comm.getGameID()) + " does not exist");
+    public void connectGame (Session session, ConnectCommand comm) throws InvalidUserCommandError {
+        ServerGame serverGame = null;
+        try {
+            String username = DAO.AUTH_DAO.validateAuth(comm.getAuthToken());
+            serverGame = games.get(comm.getGameID());
+            if (serverGame == null) {
+                GameData readGame = DAO.GAME_DAO.readGame(comm.getGameID());
+                if (readGame == null) {
+                    throw new InvalidUserCommandError("Game " + String.valueOf(comm.getGameID()) + " does not exist");
+                }
+                serverGame = new ServerGame(readGame);
+            }
+            games.put(serverGame.game.metadata.gameID, serverGame);
+            serverGame.connectedSessions.add(session);
+            serverGame.sendAllMessage(username + " joined the game");
+        } catch (InvalidUserCommandError e) {
+            sendErrorMessage(session, e.getMessage());
+        } catch (Exception e) {
+// adsf
         }
     }
 
@@ -32,29 +48,60 @@ public class WebsocketService {
     }
 
     public void leaveGame (Session session, LeaveCommand comm) {
+        ServerGame serverGame = null;
+        try {
+            String username = DAO.AUTH_DAO.validateAuth(comm.getAuthToken());
+            serverGame = games.get(comm.getGameID());
+            if (serverGame == null) {
+                throw new InvalidUserCommandError("Game " + String.valueOf(comm.getGameID()) + " does not exist");
+            }
+            serverGame.connectedSessions.remove(session);
+            serverGame.sendAllMessage(username + " left");
+        } catch (InvalidUserCommandError e) {
+            sendErrorMessage(session, e.getMessage());
+        } catch (Exception e) {
+//            sendErrorMessage(session, e.getMessage());
+        }
     }
 
     public void resignGame (Session session, ResignCommand comm) {
+        ServerGame serverGame = null;
+        try {
+            String username = DAO.AUTH_DAO.validateAuth(comm.getAuthToken());
+            serverGame = games.get(comm.getGameID());
+            if (serverGame == null) {
+                throw new InvalidUserCommandError("Game " + String.valueOf(comm.getGameID()) + " does not exist");
+            }
+            if (serverGame.userTeam(username) == null) {
+                throw new InvalidUserCommandError("You are only observing this game");
+            }
+            serverGame.connectedSessions.remove(session);
+            serverGame.sendAllMessage(username + " resigned from the game");
+        } catch (InvalidUserCommandError e) {
+            sendErrorMessage(session, e.getMessage());
+        } catch (Exception e) {
+//            sendErrorMessage(session, e.getMessage());
+        }
     }
 
-    public void sendNotificationMessage(String msg, Session session){
+    public void sendNotificationMessage(Session session, String msg){
         try {
             session.getRemote().sendString(new Gson().toJson(new NotificationMessage(msg)));
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
     }
 
-    public void sendErrorMessage(String msg, Session session){
+    public void sendErrorMessage(Session session, String msg){
         try {
             session.getRemote().sendString(new Gson().toJson(new ErrorMessage(msg)));
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
     }
 
-    public void sendLoadGameMessage(ChessGame game, Session session) {
+    public void sendLoadGameMessage(Session session, ChessGame game) {
         try {
             session.getRemote().sendString(new Gson().toJson(new LoadGameMessage(game)));
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
     }
 }
