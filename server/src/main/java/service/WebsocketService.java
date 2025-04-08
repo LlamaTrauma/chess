@@ -1,66 +1,60 @@
 package service;
 
-import org.eclipse.jetty.websocket.api.*;
+import chess.ChessGame;
+import com.google.gson.Gson;
 import websocket.commands.ConnectCommand;
 import websocket.commands.LeaveCommand;
 import websocket.commands.MoveCommand;
 import websocket.commands.ResignCommand;
+import org.eclipse.jetty.websocket.api.Session;
+import websocket.messages.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class WebsocketService {
-    ArrayList<Session> connectedPlayers;
-    Session host;
+
+    private final HashMap<Integer, ServerGame> games;
 
     public WebsocketService () {
-        connectedPlayers = new ArrayList<>();
+        games = new HashMap<Integer, ServerGame>();
     }
 
     public void connectGame (Session session, ConnectCommand comm) {
-        connectedPlayers.add(session);
+        ServerGame game = games.get(comm.getGameID());
+        if (game == null) {
+            throw new GameDoesNotExist("Game " + String.valueOf(comm.getGameID()) + " does not exist");
+        }
     }
 
     public void moveGame (Session session, MoveCommand comm) {
-        connectedPlayers.add(session);
     }
 
     public void leaveGame (Session session, LeaveCommand comm) {
-        connectedPlayers.add(session);
     }
 
     public void resignGame (Session session, ResignCommand comm) {
-        connectedPlayers.add(session);
     }
 
-    public boolean sendHostMessage (String message) {
-        while (!connectedPlayers.isEmpty()) {
-            if (host == null) {
-                host = connectedPlayers.getFirst();
-            }
-            try {
-                sendMessage(host, message);
-            } catch (Exception e) {
-                host = null;
-            }
-        }
-    }
-
-    public boolean sendMessage(Session session, String message) {
+    public void sendNotificationMessage(String msg, Session session){
         try {
-            session.getRemote().sendString(message);
-            return true;
-        } catch (Exception e) {
-            return false;
+            session.getRemote().sendString(new Gson().toJson(new NotificationMessage(msg)));
+        } catch (IOException e) {
         }
     }
 
-    public void sendAllMessage(String message) {
-        for (var session: new ArrayList<>(connectedPlayers)) {
-            try {
-                session.getRemote().sendString(message);
-            } catch (Exception e) {
-                connectedPlayers.remove(session);
-            }
+    public void sendErrorMessage(String msg, Session session){
+        try {
+            session.getRemote().sendString(new Gson().toJson(new ErrorMessage(msg)));
+        } catch (IOException e) {
+        }
+    }
+
+    public void sendLoadGameMessage(ChessGame game, Session session) {
+        try {
+            session.getRemote().sendString(new Gson().toJson(new LoadGameMessage(game)));
+        } catch (IOException e) {
         }
     }
 }

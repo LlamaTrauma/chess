@@ -12,4 +12,5 @@ public interface GameDAO {
     public ArrayList<GameMetadata> listGames() throws DataAccessException;
     public void joinGame(String username, int gameID, ChessGame.TeamColor team) throws DataAccessException;
     public void deleteGames() throws DataAccessException;
+    public GameData readGame(int gameID) throws DataAccessException;
 }

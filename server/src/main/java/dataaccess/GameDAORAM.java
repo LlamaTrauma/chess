@@ -53,4 +53,8 @@ public class GameDAORAM implements GameDAO {
     public void deleteGames() {
         gamesByID.clear();
     }
+
+    public GameData readGame(int gameID) throws DataAccessException {
+        return null;
+    }
 }

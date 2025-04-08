@@ -12,38 +12,38 @@ public class WebsocketHandler {
     public static void handleConnectGameCommand (Session session, ConnectCommand comm) {
         try {
             service.connectGame(session, comm);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+        } catch (GameDoesNotExist e) {
+            handleInvalidCommand(session, "game does not exist");
         }
     }
 
     public static void handleMoveGameCommand (Session session, MoveCommand comm) {
         try {
             service.moveGame(session, comm);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+        } catch (GameDoesNotExist e) {
+            handleInvalidCommand(session, "game does not exist");
         }
     }
 
     public static void handleLeaveGameCommand (Session session, LeaveCommand comm) {
         try {
             service.leaveGame(session, comm);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+        } catch (GameDoesNotExist e) {
+            handleInvalidCommand(session, "game does not exist");
         }
     }
 
     public static void handleResignGameCommand (Session session, ResignCommand comm) {
         try {
             service.resignGame(session, comm);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+        } catch (GameDoesNotExist e) {
+            handleInvalidCommand(session, "game does not exist");
         }
     }
 
     public static void handleInvalidCommand (Session session, String message) {
-    }
-
-    public static void handleError (String error) {
+        try {
+            session.getRemote().sendString(message);
+        } catch (Exception ignored){}
     }
 }

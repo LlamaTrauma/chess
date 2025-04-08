@@ -7,6 +7,7 @@ import model.GameMetadata;
 import service.RequestException;
 import service.TakenException;
 
+import javax.xml.crypto.Data;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -118,6 +119,30 @@ public class GameDAOSQL extends DAOSQL implements GameDAO {
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Deleting games failed");
+        }
+    }
+
+    public GameData readGame(int gameID) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT white_username, black_username, name, serialized_game FROM games WHERE game_id = ?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        GameMetadata metadata = new GameMetadata(gameID,
+                                rs.getString("white_username"),
+                                rs.getString("black_username"),
+                                rs.getString("name")
+                        );
+                        ChessGame game = new Gson().fromJson(rs.getString("serialized_game"), ChessGame.class);
+                        return new GameData(metadata, game);
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("reading game failed");
         }
     }
 }

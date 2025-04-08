@@ -94,23 +94,19 @@ public class Server {
         } catch (Exception e) {
             WebsocketHandler.handleInvalidCommand(session, message);
         }
-        try {
-            switch (type) {
-                case CONNECT:
-                    WebsocketHandler.handleConnectGameCommand(session, new Gson().fromJson(message, ConnectCommand.class));
-                    break;
-                case MAKE_MOVE:
-                    WebsocketHandler.handleMoveGameCommand(session, new Gson().fromJson(message, MoveCommand.class));
-                    break;
-                case LEAVE:
-                    WebsocketHandler.handleLeaveGameCommand(session, new Gson().fromJson(message, LeaveCommand.class));
-                    break;
-                case RESIGN:
-                    WebsocketHandler.handleResignGameCommand(session, new Gson().fromJson(message, ResignCommand.class));
-                    break;
-            }
-        } catch (Exception e) {
-            WebsocketHandler.handleError(e.getMessage());
+        switch (type) {
+            case CONNECT:
+                WebsocketHandler.handleConnectGameCommand(session, new Gson().fromJson(message, ConnectCommand.class));
+                break;
+            case MAKE_MOVE:
+                WebsocketHandler.handleMoveGameCommand(session, new Gson().fromJson(message, MoveCommand.class));
+                break;
+            case LEAVE:
+                WebsocketHandler.handleLeaveGameCommand(session, new Gson().fromJson(message, LeaveCommand.class));
+                break;
+            case RESIGN:
+                WebsocketHandler.handleResignGameCommand(session, new Gson().fromJson(message, ResignCommand.class));
+                break;
         }
     }
 }
