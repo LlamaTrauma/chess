@@ -1,21 +1,16 @@
 package websocket.commands;
 
+import chess.ChessMove;
 import chess.ChessPosition;
 
 public class MoveCommand extends UserGameCommand {
-    private final ChessPosition start;
-    private final ChessPosition end;
-    public MoveCommand(String authToken, Integer gameID, ChessPosition start, ChessPosition end) {
+    private final ChessMove move;
+    public MoveCommand(String authToken, Integer gameID, ChessMove move) {
         super(CommandType.CONNECT, authToken, gameID);
-        this.start = start;
-        this.end = end;
+        this.move = move;
     }
 
-    public ChessPosition getStart() {
-        return start;
-    }
-
-    public ChessPosition getEnd() {
-        return end;
+    public ChessMove getMove() {
+        return move;
     }
 }

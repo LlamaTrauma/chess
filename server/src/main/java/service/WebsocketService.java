@@ -1,6 +1,8 @@
 package service;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DAO;
 import model.GameData;
@@ -37,6 +39,7 @@ public class WebsocketService {
             games.put(serverGame.game.metadata.gameID, serverGame);
             serverGame.connectedSessions.add(session);
             serverGame.sendAllMessage(username + " joined the game");
+            sendLoadGameMessage(session, serverGame.game.game);
         } catch (InvalidUserCommandError e) {
             sendErrorMessage(session, e.getMessage());
         } catch (Exception e) {
@@ -45,6 +48,27 @@ public class WebsocketService {
     }
 
     public void moveGame (Session session, MoveCommand comm) {
+        ServerGame serverGame = null;
+        try {
+            String username = DAO.AUTH_DAO.validateAuth(comm.getAuthToken());
+            serverGame = games.get(comm.getGameID());
+            if (serverGame == null) {
+                throw new InvalidUserCommandError("Game " + String.valueOf(comm.getGameID()) + " does not exist");
+            }
+            if (serverGame.game.game.getTeamTurn() != serverGame.userTeam(username)) {
+                throw new InvalidUserCommandError("It is not your turn to move");
+            }
+            serverGame.game.game.makeMove(comm.getMove());
+            DAO.GAME_DAO.updateGame(serverGame.game);
+            serverGame.sendAllMessage(username + " made a move");
+            serverGame.sendAllUpdate();
+        } catch (InvalidUserCommandError e) {
+            sendErrorMessage(session, e.getMessage());
+        } catch (InvalidMoveException e) {
+            sendErrorMessage(session, "invalid move");
+        } catch (Exception e) {
+
+        }
     }
 
     public void leaveGame (Session session, LeaveCommand comm) {
@@ -75,6 +99,7 @@ public class WebsocketService {
             if (serverGame.userTeam(username) == null) {
                 throw new InvalidUserCommandError("You are only observing this game");
             }
+            DAO.GAME_DAO.updateGame(serverGame.game);
             serverGame.connectedSessions.remove(session);
             serverGame.sendAllMessage(username + " resigned from the game");
         } catch (InvalidUserCommandError e) {
@@ -83,14 +108,7 @@ public class WebsocketService {
 //            sendErrorMessage(session, e.getMessage());
         }
     }
-
-    public void sendNotificationMessage(Session session, String msg){
-        try {
-            session.getRemote().sendString(new Gson().toJson(new NotificationMessage(msg)));
-        } catch (IOException ignored) {
-        }
-    }
-
+    
     public void sendErrorMessage(Session session, String msg){
         try {
             session.getRemote().sendString(new Gson().toJson(new ErrorMessage(msg)));

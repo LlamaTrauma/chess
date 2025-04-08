@@ -57,4 +57,6 @@ public class GameDAORAM implements GameDAO {
     public GameData readGame(int gameID) throws DataAccessException {
         return null;
     }
+
+    public void updateGame(GameData data) throws DataAccessException, TakenException {}
 }

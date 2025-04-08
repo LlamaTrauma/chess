@@ -1,9 +1,13 @@
 package service;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 import dataaccess.DAO;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 
 import java.util.ArrayList;
 
@@ -16,19 +20,20 @@ public class ServerGame {
         game = data;
     }
 
-    public boolean sendMessage(Session session, String message) {
-        try {
-            session.getRemote().sendString(message);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     public void sendAllMessage(String message) {
         for (var session: new ArrayList<>(connectedSessions)) {
             try {
-                session.getRemote().sendString(message);
+                session.getRemote().sendString(new Gson().toJson(new NotificationMessage(message)));
+            } catch (Exception e) {
+                connectedSessions.remove(session);
+            }
+        }
+    }
+
+    public void sendAllUpdate() {
+        for (var session: new ArrayList<>(connectedSessions)) {
+            try {
+                session.getRemote().sendString(new Gson().toJson(new LoadGameMessage(game.game)));
             } catch (Exception e) {
                 connectedSessions.remove(session);
             }
