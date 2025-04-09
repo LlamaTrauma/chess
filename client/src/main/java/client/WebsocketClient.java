@@ -8,14 +8,12 @@ import java.net.URISyntaxException;
 public class WebsocketClient extends Endpoint {
     int port;
     public Session session;
-    private final Client client;
 
     public WebsocketClient (int port, Client client) throws URISyntaxException, DeploymentException, IOException {
         this.port = port;
         URI uri = new URI("ws://localhost:" + String.valueOf(port) + "/ws");
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         this.session = container.connectToServer(this, uri);
-        this.client = client;
 
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {

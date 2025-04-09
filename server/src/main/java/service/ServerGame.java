@@ -14,6 +14,7 @@ import java.util.ArrayList;
 public class ServerGame {
     public GameData game;
     ArrayList<Session> connectedSessions;
+    boolean over = false;
 
     public ServerGame(GameData data) throws Exception {
         connectedSessions = new ArrayList<>();

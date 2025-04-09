@@ -28,14 +28,16 @@ public class Main {
                     returnFlag = doPostLoginLoop();
                 } while (returnFlag == CONTINUE);
             } else if (returnFlag == LOOP_GAME) {
+                CLIENT.current_game = null;
                 try {
-                    WebsocketClient client = new WebsocketClient(8080, CLIENT);
+                    WebsocketClient ws = new WebsocketClient(8080, CLIENT);
+                    do {
+                        returnFlag = doPlayingLoop(ws);
+                    } while (returnFlag == CONTINUE);
                 } catch (Exception e) {
                     System.out.println("unable to start websocket client");
+                    returnFlag = LOOP_POST;
                 }
-                do {
-                    returnFlag = doPlayingLoop();
-                } while (returnFlag == CONTINUE);
             } else {
                 returnFlag = QUIT;
             }
@@ -66,14 +68,14 @@ public class Main {
         return returnFlag;
     }
 
-    private static Client.HandleInputReturnFlag doPlayingLoop() {
+    private static Client.HandleInputReturnFlag doPlayingLoop(WebsocketClient ws) {
         Scanner scanner = new Scanner(System.in);
         String input;
         Client.HandleInputReturnFlag returnFlag = Client.HandleInputReturnFlag.CONTINUE;
         while (returnFlag == Client.HandleInputReturnFlag.CONTINUE) {
             System.out.print("[" + CLIENT.getUsername() + "] >>> ");
             input = scanner.nextLine();
-            returnFlag = CLIENT.handlePlayingInput(input);
+            returnFlag = CLIENT.handlePlayingInput(ws, input);
         }
         return returnFlag;
     }

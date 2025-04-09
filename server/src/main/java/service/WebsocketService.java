@@ -51,6 +51,7 @@ public class WebsocketService {
         ServerGame serverGame = null;
         try {
             String username = DAO.AUTH_DAO.validateAuth(comm.getAuthToken());
+            String extraInfo = "";
             serverGame = games.get(comm.getGameID());
             if (serverGame == null) {
                 throw new InvalidUserCommandError("Game " + String.valueOf(comm.getGameID()) + " does not exist");
@@ -58,9 +59,23 @@ public class WebsocketService {
             if (serverGame.game.game.getTeamTurn() != serverGame.userTeam(username)) {
                 throw new InvalidUserCommandError("It is not your turn to move");
             }
+            if (serverGame.over) {
+                throw new InvalidUserCommandError("Game is over");
+            }
             serverGame.game.game.makeMove(comm.getMove());
+            if (serverGame.game.game.isInCheckmate(serverGame.game.game.getTeamTurn())) {
+                extraInfo += (serverGame.game.game.getTeamTurn() == ChessGame.TeamColor.WHITE ?
+                        "WHITE" : "BLACK") + " is in checkmate";
+                serverGame.over = true;
+            } else if (serverGame.game.game.isInStalemate(serverGame.game.game.getTeamTurn())) {
+                extraInfo += "Game is a stalemate";
+                serverGame.over = true;
+            } else if (serverGame.game.game.isInCheck(serverGame.game.game.getTeamTurn())) {
+                extraInfo += (serverGame.game.game.getTeamTurn() == ChessGame.TeamColor.WHITE ?
+                        "WHITE" : "BLACK") + " is in check";
+            }
             DAO.GAME_DAO.updateGame(serverGame.game);
-            serverGame.sendAllMessage(username + " made a move");
+            serverGame.sendAllMessage(username + " made a move" + (extraInfo.isEmpty() ? "" : "\n" + extraInfo));
             serverGame.sendAllUpdate();
         } catch (InvalidUserCommandError e) {
             sendErrorMessage(session, e.getMessage());
@@ -100,8 +115,8 @@ public class WebsocketService {
                 throw new InvalidUserCommandError("You are only observing this game");
             }
             DAO.GAME_DAO.updateGame(serverGame.game);
-            serverGame.connectedSessions.remove(session);
             serverGame.sendAllMessage(username + " resigned from the game");
+            serverGame.over = true;
         } catch (InvalidUserCommandError e) {
             sendErrorMessage(session, e.getMessage());
         } catch (Exception e) {

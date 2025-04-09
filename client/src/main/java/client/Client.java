@@ -1,14 +1,18 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
+import com.google.gson.Gson;
 import model.ListGamesResult;
 import model.LoginResult;
 import requestmodel.RegisterResult;
+import service.WebsocketService;
 import ui.EscapeSequences;
+import websocket.commands.LeaveCommand;
+import websocket.commands.MoveCommand;
+import websocket.commands.ResignCommand;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,7 +56,9 @@ public class Client {
     private String authToken;
     private final Map<Integer, Integer> listedIDs = new HashMap<>();
 
-    private ChessGame current_game;
+    private int gameID;
+    public ChessGame current_game;
+    public ChessGame.TeamColor current_color;
 
     public String getUsername() {
         return username;
@@ -144,7 +150,7 @@ public class Client {
         }
     }
 
-    public HandleInputReturnFlag handlePlayingInput(String input) {
+    public HandleInputReturnFlag handlePlayingInput(WebsocketClient ws, String input) {
         PlayingPrompt prompt = translateInputPlaying(input);
         switch (prompt) {
             case HELP:
@@ -154,13 +160,13 @@ public class Client {
                 handleRedraw();
                 return HandleInputReturnFlag.CONTINUE;
             case MOVE:
-                handleMove();
+                handleMove(ws, input);
                 return HandleInputReturnFlag.CONTINUE;
             case LEAVE:
-                handleLeave();
+                handleLeave(ws);
                 return HandleInputReturnFlag.LOOP_POST;
             case RESIGN:
-                handleResign();
+                handleResign(ws);
                 return HandleInputReturnFlag.CONTINUE;
             case HIGHLIGHT:
                 handleHighlight(input);
@@ -171,13 +177,117 @@ public class Client {
         }
     }
 
+    public void handleLeave(WebsocketClient ws) {
+        try {
+            ws.send(new Gson().toJson(new LeaveCommand(authToken, gameID)));
+        } catch (Exception e) {
+            System.out.println("unable to connect to server");
+        }
+    }
+
+    public void handleResign(WebsocketClient ws) {
+        try {
+            ws.send(new Gson().toJson(new ResignCommand(authToken, gameID)));
+        } catch (Exception e) {
+            System.out.println("unable to connect to server");
+        }
+    }
+
+    public void handleHighlight(String input) {
+        var inputs = input.split("\\s+");
+        if (inputs.length < 4) {
+            System.out.println("specify position");
+            return;
+        } else if (inputs.length > 4) {
+            System.out.println("too many inputs");
+            return;
+        }
+        ChessPosition highlightPos = inputToPosition(inputs[3]);
+        if (highlightPos == null) {
+            System.out.println("invalid position");
+        }
+        var legalMoves = current_game.validMoves(highlightPos);
+        ArrayList<ChessPosition> legalPositions = new ArrayList<>();
+        for (var move: legalMoves) {
+            legalPositions.add(move.getEndPosition());
+        }
+        displayChessGame(current_game, current_color, legalPositions);
+    }
+
+    public void handleRedraw() {
+        if (current_game == null) {
+            System.out.println("Cannot redraw game");
+        } else {
+            displayChessGame(current_game, current_color);
+        }
+    }
+
+    private ChessPosition inputToPosition(String input) {
+        if (input.length() > 2) {
+            return null;
+        }
+        int row = (int) input.charAt(0) - '0';
+        int col = (int) input.toLowerCase().charAt(1) - 'a' + 1;
+        return new ChessPosition(row, col);
+    }
+
+    public void handleMove(WebsocketClient ws, String input) {
+        var inputs = input.split("\\s+");
+        if (inputs.length < 4) {
+            System.out.println("too few inputs");
+            return;
+        }
+        ChessPosition start = inputToPosition(inputs[2]);
+        ChessPosition end = inputToPosition(inputs[3]);
+        if (start == null || end == null) {
+            System.out.println("invalid positions");
+            return;
+        }
+        ChessPiece.PieceType promotion = ChessPiece.PieceType.PAWN;
+        if (current_game.getBoard().getPiece(start).getPieceType() == ChessPiece.PieceType.PAWN && (end.getRow() == 1 || end.getRow() == 8)) {
+            if (inputs.length < 5) {
+                System.out.println("specify promotion type");
+                return;
+            } else if (inputs.length > 5) {
+                System.out.println("too many arguments");
+                return;
+            }
+            switch (inputs[4].toLowerCase().charAt(0)) {
+                case 'q':
+                    promotion = ChessPiece.PieceType.QUEEN;
+                    break;
+                case 'b':
+                    promotion = ChessPiece.PieceType.BISHOP;
+                    break;
+                case 'r':
+                    promotion = ChessPiece.PieceType.ROOK;
+                    break;
+                case 'k':
+                    promotion = ChessPiece.PieceType.KNIGHT;
+                    break;
+                default:
+                    System.out.println("Invalid promotion");
+                    return;
+            }
+        } else if (inputs.length > 4) {
+            System.out.println("too many arguments");
+            return;
+        }
+        ChessMove move = new ChessMove(start, end, promotion);
+        try {
+            ws.send(new Gson().toJson(new MoveCommand(authToken, gameID, move)));
+        } catch (Exception e) {
+            System.out.println("Failed to connect to server");
+        }
+    }
+
     public void handlePlayingHelp() {
         System.out.println("help");
         System.out.println("redraw chess board");
         System.out.println("leave");
-        System.out.println("make move <piece> <end position>");
+        System.out.println("make move <piece> <end position> <promotion>");
         System.out.println("resign");
-        System.out.println("highlight legal move <piece>");
+        System.out.println("highlight legal moves <piece>");
     }
 
     public boolean handleLogin(String input) {
@@ -280,6 +390,7 @@ public class Client {
                 System.out.println("Game does not exist");
                 return;
             }
+            gameID = id;
             displayChessGame(new ChessGame(), ChessGame.TeamColor.WHITE);
         } catch (Exception e) {
             System.out.println("Failed to get game");
@@ -341,6 +452,7 @@ public class Client {
         }
         try {
             facade.playRequest(authToken, color, id);
+            gameID = id;
             displayChessGame(new ChessGame(), team);
         } catch (RuntimeException e) {
             System.out.println("Joining game failed");
@@ -386,6 +498,10 @@ public class Client {
     }
 
     public void displayChessGame(ChessGame game, ChessGame.TeamColor team) {
+        displayChessGame(game, team, new ArrayList<>());
+    }
+
+    public void displayChessGame(ChessGame game, ChessGame.TeamColor team, ArrayList<ChessPosition> highlights) {
         ChessBoard board = game.getBoard();
         int row = team == ChessGame.TeamColor.BLACK ? 0 : 7;
         int rowDiff = team == ChessGame.TeamColor.BLACK ? 1 : -1;
@@ -398,6 +514,9 @@ public class Client {
             out += EscapeSequences.SET_BG_COLOR_BLACK + " " + String.valueOf(row + 1) + " ";
             while (col >= 0 && col <= 7) {
                 ChessPiece piece = board.getPiece(new ChessPosition(row + 1, col + 1));
+                if (highlights.contains(new ChessPosition(row + 1, col + 1))) {
+                    out += ((row % 2) + col) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_DARK_GREEN : EscapeSequences.SET_BG_COLOR_GREEN;
+                }
                 out += ((row % 2) + col) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_DARK_GREY : EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
                 if (piece == null) {
                     out += EscapeSequences.EMPTY;
