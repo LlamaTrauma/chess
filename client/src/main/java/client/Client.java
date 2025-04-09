@@ -385,7 +385,7 @@ public class Client {
         System.out.println("help\n");
     }
 
-    private void displayChessGame(ChessGame game, ChessGame.TeamColor team) {
+    public void displayChessGame(ChessGame game, ChessGame.TeamColor team) {
         ChessBoard board = game.getBoard();
         int row = team == ChessGame.TeamColor.BLACK ? 0 : 7;
         int rowDiff = team == ChessGame.TeamColor.BLACK ? 1 : -1;

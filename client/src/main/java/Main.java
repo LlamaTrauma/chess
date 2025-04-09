@@ -1,5 +1,6 @@
 import chess.*;
 import client.Client;
+import client.WebsocketClient;
 import server.Server;
 
 import java.util.Scanner;
@@ -27,6 +28,11 @@ public class Main {
                     returnFlag = doPostLoginLoop();
                 } while (returnFlag == CONTINUE);
             } else if (returnFlag == LOOP_GAME) {
+                try {
+                    WebsocketClient client = new WebsocketClient(8080, CLIENT);
+                } catch (Exception e) {
+                    System.out.println("unable to start websocket client");
+                }
                 do {
                     returnFlag = doPlayingLoop();
                 } while (returnFlag == CONTINUE);

@@ -33,7 +33,7 @@ public class ServerGame {
     public void sendAllUpdate() {
         for (var session: new ArrayList<>(connectedSessions)) {
             try {
-                session.getRemote().sendString(new Gson().toJson(new LoadGameMessage(game.game)));
+                session.getRemote().sendString(new Gson().toJson(new LoadGameMessage(game.game, game.metadata.blackUsername)));
             } catch (Exception e) {
                 connectedSessions.remove(session);
             }

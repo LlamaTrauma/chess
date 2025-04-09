@@ -39,7 +39,7 @@ public class WebsocketService {
             games.put(serverGame.game.metadata.gameID, serverGame);
             serverGame.connectedSessions.add(session);
             serverGame.sendAllMessage(username + " joined the game");
-            sendLoadGameMessage(session, serverGame.game.game);
+            sendLoadGameMessage(session, serverGame.game);
         } catch (InvalidUserCommandError e) {
             sendErrorMessage(session, e.getMessage());
         } catch (Exception e) {
@@ -108,7 +108,7 @@ public class WebsocketService {
 //            sendErrorMessage(session, e.getMessage());
         }
     }
-    
+
     public void sendErrorMessage(Session session, String msg){
         try {
             session.getRemote().sendString(new Gson().toJson(new ErrorMessage(msg)));
@@ -116,9 +116,9 @@ public class WebsocketService {
         }
     }
 
-    public void sendLoadGameMessage(Session session, ChessGame game) {
+    public void sendLoadGameMessage(Session session, GameData game) {
         try {
-            session.getRemote().sendString(new Gson().toJson(new LoadGameMessage(game)));
+            session.getRemote().sendString(new Gson().toJson(new LoadGameMessage(game.game, game.metadata.blackUsername)));
         } catch (IOException ignored) {
         }
     }
