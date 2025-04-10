@@ -27,8 +27,8 @@ public class ClientWebsocketHandler {
     }
 
     public static void displayGame(Client client, LoadGameMessage msg) {
-        client.current_game = msg.game;
-        client.current_color = client.getUsername().equals(msg.blackUsername) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+        client.currentGame = msg.game;
+        client.currentColor = client.getUsername().equals(msg.blackUsername) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
         System.out.println("\n");
         client.displayChessGame(msg.game, client.getUsername().equals(msg.blackUsername) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
     }

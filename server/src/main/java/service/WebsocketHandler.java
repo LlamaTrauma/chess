@@ -7,11 +7,11 @@ import websocket.commands.MoveCommand;
 import websocket.commands.ResignCommand;
 
 public class WebsocketHandler {
-    private static final WebsocketService service = new WebsocketService();
+    private static final WebsocketService SERVICE = new WebsocketService();
 
     public static void handleConnectGameCommand (Session session, ConnectCommand comm) {
         try {
-            service.connectGame(session, comm);
+            SERVICE.connectGame(session, comm);
         } catch (InvalidUserCommandError e) {
             handleInvalidCommand(session, e.getMessage());
         }
@@ -19,7 +19,7 @@ public class WebsocketHandler {
 
     public static void handleMoveGameCommand (Session session, MoveCommand comm) {
         try {
-            service.moveGame(session, comm);
+            SERVICE.moveGame(session, comm);
         } catch (InvalidUserCommandError e) {
             handleInvalidCommand(session, e.getMessage());
         }
@@ -27,7 +27,7 @@ public class WebsocketHandler {
 
     public static void handleLeaveGameCommand (Session session, LeaveCommand comm) {
         try {
-            service.leaveGame(session, comm);
+            SERVICE.leaveGame(session, comm);
         } catch (InvalidUserCommandError e) {
             handleInvalidCommand(session, e.getMessage());
         }
@@ -35,13 +35,13 @@ public class WebsocketHandler {
 
     public static void handleResignGameCommand (Session session, ResignCommand comm) {
         try {
-            service.resignGame(session, comm);
+            SERVICE.resignGame(session, comm);
         } catch (InvalidUserCommandError e) {
             handleInvalidCommand(session, e.getMessage());
         }
     }
 
     public static void handleInvalidCommand (Session session, String message) {
-        service.sendErrorMessage(session, message);
+        SERVICE.sendErrorMessage(session, message);
     }
 }

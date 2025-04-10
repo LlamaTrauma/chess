@@ -62,7 +62,7 @@ public class Service {
 
         String username = AUTH_DAO.validateAuth(authToken);
 
-        GAME_DAO.joinGame(username, req.gameID(), req.playerColor().equalsIgnoreCase("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK);
+        GAME_DAO.joinGame(username, req.gameID(), req.playerColor().equalsIgnoreCase("WHITE") ? ChessGame.TeamColor.WHITE:ChessGame.TeamColor.BLACK);
         return new JoinGameResult();
     }
 

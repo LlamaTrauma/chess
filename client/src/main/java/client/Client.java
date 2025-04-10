@@ -54,8 +54,8 @@ public class Client {
     private final Map<Integer, Integer> listedIDs = new HashMap<>();
 
     private int gameID;
-    public ChessGame current_game;
-    public ChessGame.TeamColor current_color;
+    public ChessGame currentGame;
+    public ChessGame.TeamColor currentColor;
 
     public WebsocketClient ws;
 
@@ -67,64 +67,16 @@ public class Client {
         ws = null;
     }
 
-    private PlayingPrompt translateInputPlaying (String input) {
-        if (input.contains("help")) {
-            return PlayingPrompt.HELP;
-        }
-        if (input.contains("redraw chess board")) {
-            return PlayingPrompt.REDRAW;
-        }
-        if (input.contains("make move")) {
-            return PlayingPrompt.MOVE;
-        }
-        if (input.contains("resign")) {
-            return PlayingPrompt.RESIGN;
-        }
-        if (input.contains("highlight legal moves")) {
-            return PlayingPrompt.HIGHLIGHT;
-        }
-        if (input.contains("leave")) {
-           return PlayingPrompt.LEAVE;
-        }
-        return null;
+    private PlayingPrompt translateInputPlaying(String input) {
+        return ClientOverflow.translateInputPlaying(input);
     }
 
-    private PostLoginPrompt translateInputPostLogin (String input) {
-        if (input.contains("help")) {
-            return PostLoginPrompt.HELP;
-        }
-        if (input.contains("list games")) {
-            return PostLoginPrompt.LIST;
-        }
-        if (input.contains("play game")) {
-            return PostLoginPrompt.PLAY;
-        }
-        if (input.contains("logout")) {
-            return PostLoginPrompt.LOGOUT;
-        }
-        if (input.contains("observe game")) {
-            return PostLoginPrompt.OBSERVE;
-        }
-        if (input.contains("create game")) {
-            return PostLoginPrompt.CREATE;
-        }
-        return null;
+    private PostLoginPrompt translateInputPostLogin(String input) {
+        return ClientOverflow.translateInputPostLogin(input);
     }
 
-    private PreLoginPrompt translateInputPreLogin (String input) {
-        if (input.contains("help")) {
-            return PreLoginPrompt.HELP;
-        }
-        if (input.contains("quit")) {
-            return PreLoginPrompt.QUIT;
-        }
-        if (input.contains("login")) {
-            return PreLoginPrompt.LOGIN;
-        }
-        if (input.contains("register")) {
-            return PreLoginPrompt.REGISTER;
-        }
-        return null;
+    private PreLoginPrompt translateInputPreLogin(String input) {
+        return ClientOverflow.translateInputPreLogin(input);
     }
 
     public HandleInputReturnFlag handlePreLoginInput(String input) {
@@ -250,19 +202,19 @@ public class Client {
             System.out.println("invalid position");
             return;
         }
-        var legalMoves = current_game.validMoves(highlightPos);
+        var legalMoves = currentGame.validMoves(highlightPos);
         ArrayList<ChessPosition> legalPositions = new ArrayList<>();
-        for (var move: legalMoves) {
+        for (var move : legalMoves) {
             legalPositions.add(move.getEndPosition());
         }
-        displayChessGame(current_game, current_color, legalPositions);
+        displayChessGame(currentGame, currentColor, legalPositions);
     }
 
     public void handleRedraw() {
-        if (current_game == null) {
+        if (currentGame == null) {
             System.out.println("Cannot redraw game");
         } else {
-            displayChessGame(current_game, current_color);
+            displayChessGame(currentGame, currentColor);
         }
     }
 
@@ -291,7 +243,7 @@ public class Client {
             return;
         }
         ChessPiece.PieceType promotion = null;
-        if (current_game.getBoard().getPiece(start).getPieceType() == ChessPiece.PieceType.PAWN && (end.getRow() == 1 || end.getRow() == 8)) {
+        if (currentGame.getBoard().getPiece(start).getPieceType() == ChessPiece.PieceType.PAWN && (end.getRow() == 1 || end.getRow() == 8)) {
             if (inputs.length < 5) {
                 System.out.println("specify promotion type");
                 return;
@@ -401,7 +353,9 @@ public class Client {
                 return false;
             }
             int gameNum = 0;
-            try { gameNum = Integer.parseInt(args[2]); } catch (NumberFormatException e) {
+            try {
+                gameNum = Integer.parseInt(args[2]);
+            } catch (NumberFormatException e) {
                 System.out.print("Couldn't parse game number");
                 return false;
             }
@@ -513,12 +467,7 @@ public class Client {
     }
 
     public void handlePostLoginHelp() {
-        System.out.println("create game <game name>\n");
-        System.out.println("play game <game number> <color>\n");
-        System.out.println("observe game <game number>\n");
-        System.out.println("list games\n");
-        System.out.println("logout\n");
-        System.out.println("help\n");
+        ClientOverflow.handlePostLoginHelp();
     }
 
     public void displayChessGame(ChessGame game, ChessGame.TeamColor team) {
@@ -526,54 +475,6 @@ public class Client {
     }
 
     public void displayChessGame(ChessGame game, ChessGame.TeamColor team, ArrayList<ChessPosition> highlights) {
-        ChessBoard board = game.getBoard();
-        int row = team == ChessGame.TeamColor.BLACK ? 0 : 7;
-        int rowDiff = team == ChessGame.TeamColor.BLACK ? 1 : -1;
-        String row_s = team == ChessGame.TeamColor.WHITE ? "    a   b  c   d   e   f  g   h    " : "    h   g  f   e   d   c  b   a    ";
-        row_s = EscapeSequences.SET_BG_COLOR_BLACK + row_s + EscapeSequences.RESET_BG_COLOR + "\n";
-        String out = row_s;
-        while (row >= 0 && row <= 7) {
-            int col = team == ChessGame.TeamColor.BLACK ? 7 : 0;
-            int colDiff = team == ChessGame.TeamColor.BLACK ? -1 : 1;
-            out += EscapeSequences.SET_BG_COLOR_BLACK + " " + String.valueOf(row + 1) + " ";
-            while (col >= 0 && col <= 7) {
-                ChessPiece piece = board.getPiece(new ChessPosition(row + 1, col + 1));
-                if (highlights.contains(new ChessPosition(row + 1, col + 1))) {
-                    out += ((row % 2) + col) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_DARK_GREEN : EscapeSequences.SET_BG_COLOR_GREEN;
-                } else {
-                    out += ((row % 2) + col) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_DARK_GREY : EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
-                }
-                if (piece == null) {
-                    out += EscapeSequences.EMPTY;
-                } else {
-                    switch (piece.getPieceType()) {
-                        case PAWN:
-                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_PAWN : EscapeSequences.BLACK_PAWN;
-                            break;
-                        case KNIGHT:
-                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_KNIGHT : EscapeSequences.BLACK_KNIGHT;
-                            break;
-                        case ROOK:
-                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_ROOK : EscapeSequences.BLACK_ROOK;
-                            break;
-                        case BISHOP:
-                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_BISHOP : EscapeSequences.BLACK_BISHOP;
-                            break;
-                        case KING:
-                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_KING : EscapeSequences.BLACK_KING;
-                            break;
-                        case QUEEN:
-                            out += piece.getTeamColor() == ChessGame.TeamColor.WHITE ? EscapeSequences.WHITE_QUEEN : EscapeSequences.BLACK_QUEEN;
-                            break;
-                    }
-                }
-                col += colDiff;
-            }
-            out += EscapeSequences.SET_BG_COLOR_BLACK + " " + String.valueOf(row + 1) + " ";
-            out += EscapeSequences.RESET_BG_COLOR + " \n";
-            row += rowDiff;
-        }
-        out += row_s;
-        System.out.println(out);
+        ClientOverflow.displayChessGame(game, team, highlights);
     }
 }

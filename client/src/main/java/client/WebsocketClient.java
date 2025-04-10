@@ -20,6 +20,7 @@ public class WebsocketClient extends Endpoint {
                 ClientWebsocketHandler.handleMessage(client, message);
             }
 
+            @OnError
             public void onError() {
                 System.out.println("Error in websocket client");
             }

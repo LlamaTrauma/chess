@@ -23,7 +23,7 @@ public class Main {
                     returnFlag = doPostLoginLoop();
                 } while (returnFlag == CONTINUE);
             } else if (returnFlag == LOOP_GAME) {
-                CLIENT.current_game = null;
+                CLIENT.currentGame = null;
                 do {
                     returnFlag = doPlayingLoop();
                 } while (returnFlag == CONTINUE);
