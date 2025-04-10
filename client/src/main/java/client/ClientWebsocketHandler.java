@@ -12,6 +12,7 @@ public class ClientWebsocketHandler {
         ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
         switch (serverMessage.getServerMessageType()) {
             case LOAD_GAME:
+                System.out.println(message);
                 displayGame(client, new Gson().fromJson(message, LoadGameMessage.class));
                 break;
             case ERROR:

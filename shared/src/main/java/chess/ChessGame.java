@@ -80,6 +80,8 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+//        System.out.println(String.valueOf(move.getStartPosition().getRow()) + ", " + String.valueOf(move.getStartPosition().getColumn()));
+//        System.out.println(String.valueOf(move.getEndPosition().getRow()) + ", " + String.valueOf(move.getEndPosition().getColumn()));
         if (!validMoves(move.getStartPosition()).contains(move)) {
             throw new InvalidMoveException("Move is invalid");
         }
