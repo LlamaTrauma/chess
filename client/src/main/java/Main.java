@@ -1,7 +1,5 @@
 import chess.*;
 import client.Client;
-import client.WebsocketClient;
-import server.Server;
 
 import java.util.Scanner;
 

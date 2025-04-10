@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import model.ListGamesResult;
 import model.LoginResult;
 import requestmodel.RegisterResult;
-import service.WebsocketService;
 import ui.EscapeSequences;
 import websocket.commands.ConnectCommand;
 import websocket.commands.LeaveCommand;
