@@ -12,10 +12,7 @@ import websocket.commands.LeaveCommand;
 import websocket.commands.MoveCommand;
 import websocket.commands.ResignCommand;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Client {
     public static enum PreLoginPrompt {
@@ -228,10 +225,15 @@ public class Client {
     }
 
     public void handleResign() {
-        try {
-            ws.send(new Gson().toJson(new ResignCommand(authToken, gameID)));
-        } catch (Exception e) {
-            System.out.println("unable to connect to server");
+        System.out.println("Are you sure you want to resign? (y/n): ");
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.nextLine();
+        if (!input.isEmpty() && input.toLowerCase().charAt(0) == 'y') {
+            try {
+                ws.send(new Gson().toJson(new ResignCommand(authToken, gameID)));
+            } catch (Exception e) {
+                System.out.println("unable to connect to server");
+            }
         }
     }
 
@@ -289,7 +291,7 @@ public class Client {
             System.out.println("invalid positions");
             return;
         }
-        ChessPiece.PieceType promotion = ChessPiece.PieceType.PAWN;
+        ChessPiece.PieceType promotion = null;
         if (current_game.getBoard().getPiece(start).getPieceType() == ChessPiece.PieceType.PAWN && (end.getRow() == 1 || end.getRow() == 8)) {
             if (inputs.length < 5) {
                 System.out.println("specify promotion type");
@@ -539,8 +541,9 @@ public class Client {
                 ChessPiece piece = board.getPiece(new ChessPosition(row + 1, col + 1));
                 if (highlights.contains(new ChessPosition(row + 1, col + 1))) {
                     out += ((row % 2) + col) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_DARK_GREEN : EscapeSequences.SET_BG_COLOR_GREEN;
+                } else {
+                    out += ((row % 2) + col) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_DARK_GREY : EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
                 }
-                out += ((row % 2) + col) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_DARK_GREY : EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
                 if (piece == null) {
                     out += EscapeSequences.EMPTY;
                 } else {

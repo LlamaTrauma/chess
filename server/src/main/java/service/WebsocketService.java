@@ -84,7 +84,10 @@ public class WebsocketService {
                         "WHITE" : "BLACK") + " is in check";
             }
             DAO.GAME_DAO.updateGame(serverGame.game);
-            serverGame.sendAllButMessage(session, username + " made a move" + (extraInfo.isEmpty() ? "" : "\n" + extraInfo));
+            serverGame.sendAllButMessage(session, username + " made a move");
+            if (!extraInfo.isEmpty()) {
+                serverGame.sendAllMessage(extraInfo);
+            }
             serverGame.sendAllUpdate();
         }
         catch (InvalidUserCommandError e) {
