@@ -31,6 +31,18 @@ public class ServerGame {
         }
     }
 
+    public void sendAllButMessage(Session exSession, String message) {
+        for (var session: new ArrayList<>(connectedSessions)) {
+            try {
+                if (!(exSession == session)) {
+                    session.getRemote().sendString(new Gson().toJson(new NotificationMessage(message)));
+                }
+            } catch (Exception e) {
+                connectedSessions.remove(session);
+            }
+        }
+    }
+
     public void sendAllUpdate() {
         for (var session: new ArrayList<>(connectedSessions)) {
             try {

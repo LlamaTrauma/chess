@@ -23,11 +23,13 @@ public class ClientWebsocketHandler {
                 System.out.println(note.message);
                 break;
         }
+        System.out.print("[" + client.getUsername() + "] >>> ");
     }
 
     public static void displayGame(Client client, LoadGameMessage msg) {
         client.current_game = msg.game;
         client.current_color = client.getUsername().equals(msg.blackUsername) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+        System.out.println("\n");
         client.displayChessGame(msg.game, client.getUsername().equals(msg.blackUsername) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
     }
 }

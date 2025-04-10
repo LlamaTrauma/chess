@@ -7,6 +7,7 @@ import model.LoginResult;
 import requestmodel.RegisterResult;
 import service.WebsocketService;
 import ui.EscapeSequences;
+import websocket.commands.ConnectCommand;
 import websocket.commands.LeaveCommand;
 import websocket.commands.MoveCommand;
 import websocket.commands.ResignCommand;
@@ -60,11 +61,15 @@ public class Client {
     public ChessGame current_game;
     public ChessGame.TeamColor current_color;
 
+    public WebsocketClient ws;
+
     public String getUsername() {
         return username;
     }
 
-    public Client() {}
+    public Client() {
+        ws = null;
+    }
 
     private PlayingPrompt translateInputPlaying (String input) {
         if (input.contains("help")) {
@@ -81,6 +86,9 @@ public class Client {
         }
         if (input.contains("highlight legal moves")) {
             return PlayingPrompt.HIGHLIGHT;
+        }
+        if (input.contains("leave")) {
+           return PlayingPrompt.LEAVE;
         }
         return null;
     }
@@ -150,7 +158,32 @@ public class Client {
         }
     }
 
-    public HandleInputReturnFlag handlePlayingInput(WebsocketClient ws, String input) {
+    public HandleInputReturnFlag handlePostLoginInput(String input) {
+        PostLoginPrompt prompt = translateInputPostLogin(input);
+        switch (prompt) {
+            case HELP:
+                handlePostLoginHelp();
+                return HandleInputReturnFlag.CONTINUE;
+            case LOGOUT:
+                handleLogout();
+                return HandleInputReturnFlag.LOOP_PRE;
+            case CREATE:
+                handleCreate(input);
+                return HandleInputReturnFlag.CONTINUE;
+            case PLAY:
+                return handlePlay(input) ? HandleInputReturnFlag.LOOP_GAME : HandleInputReturnFlag.CONTINUE;
+            case LIST:
+                handleList();
+                return HandleInputReturnFlag.CONTINUE;
+            case OBSERVE:
+                return handleObserve(input) ? HandleInputReturnFlag.LOOP_GAME : HandleInputReturnFlag.CONTINUE;
+            case null:
+                System.out.println("invalid input");
+                return HandleInputReturnFlag.CONTINUE;
+        }
+    }
+
+    public HandleInputReturnFlag handlePlayingInput(String input) {
         PlayingPrompt prompt = translateInputPlaying(input);
         switch (prompt) {
             case HELP:
@@ -160,13 +193,13 @@ public class Client {
                 handleRedraw();
                 return HandleInputReturnFlag.CONTINUE;
             case MOVE:
-                handleMove(ws, input);
+                handleMove(input);
                 return HandleInputReturnFlag.CONTINUE;
             case LEAVE:
-                handleLeave(ws);
+                handleLeave();
                 return HandleInputReturnFlag.LOOP_POST;
             case RESIGN:
-                handleResign(ws);
+                handleResign();
                 return HandleInputReturnFlag.CONTINUE;
             case HIGHLIGHT:
                 handleHighlight(input);
@@ -177,7 +210,16 @@ public class Client {
         }
     }
 
-    public void handleLeave(WebsocketClient ws) {
+    public void createWebsocket() {
+        try {
+            ws = new WebsocketClient(8080, this);
+            ws.send(new Gson().toJson(new ConnectCommand(authToken, gameID)));
+        } catch (Exception e) {
+            System.out.println("unable to start websocket client");
+        }
+    }
+
+    public void handleLeave() {
         try {
             ws.send(new Gson().toJson(new LeaveCommand(authToken, gameID)));
         } catch (Exception e) {
@@ -185,7 +227,7 @@ public class Client {
         }
     }
 
-    public void handleResign(WebsocketClient ws) {
+    public void handleResign() {
         try {
             ws.send(new Gson().toJson(new ResignCommand(authToken, gameID)));
         } catch (Exception e) {
@@ -205,6 +247,7 @@ public class Client {
         ChessPosition highlightPos = inputToPosition(inputs[3]);
         if (highlightPos == null) {
             System.out.println("invalid position");
+            return;
         }
         var legalMoves = current_game.validMoves(highlightPos);
         ArrayList<ChessPosition> legalPositions = new ArrayList<>();
@@ -226,12 +269,15 @@ public class Client {
         if (input.length() > 2) {
             return null;
         }
-        int row = (int) input.charAt(0) - '0';
-        int col = (int) input.toLowerCase().charAt(1) - 'a' + 1;
+        int col = (int) input.charAt(0) - 'a' + 1;
+        int row = (int) input.toLowerCase().charAt(1) - '0';
+        if (row < 1 || row > 8 || col < 1 || col > 8) {
+            return null;
+        }
         return new ChessPosition(row, col);
     }
 
-    public void handleMove(WebsocketClient ws, String input) {
+    public void handleMove(String input) {
         var inputs = input.split("\\s+");
         if (inputs.length < 4) {
             System.out.println("too few inputs");
@@ -342,58 +388,33 @@ public class Client {
         System.out.println("help\n");
     }
 
-    public HandleInputReturnFlag handlePostLoginInput(String input) {
-        PostLoginPrompt prompt = translateInputPostLogin(input);
-        switch (prompt) {
-            case HELP:
-                handlePostLoginHelp();
-                return HandleInputReturnFlag.CONTINUE;
-            case LOGOUT:
-                handleLogout();
-                return HandleInputReturnFlag.LOOP_PRE;
-            case CREATE:
-                handleCreate(input);
-                return HandleInputReturnFlag.CONTINUE;
-            case PLAY:
-                handlePlay(input);
-                return HandleInputReturnFlag.CONTINUE;
-            case LIST:
-                handleList();
-                return HandleInputReturnFlag.CONTINUE;
-            case OBSERVE:
-                handleObserve(input);
-                return HandleInputReturnFlag.CONTINUE;
-            case null:
-                System.out.println("invalid input");
-                return HandleInputReturnFlag.CONTINUE;
-        }
-    }
-
-    public void handleObserve(String input) {
+    public boolean handleObserve(String input) {
         try {
             String[] args = input.split("\\s+");
             if (args.length < 3) {
                 System.out.println("No game specified");
-                return;
+                return false;
             }
             if (args.length > 3) {
                 System.out.println("too many arguments");
-                return;
+                return false;
             }
             int gameNum = 0;
             try { gameNum = Integer.parseInt(args[2]); } catch (NumberFormatException e) {
                 System.out.print("Couldn't parse game number");
-                return;
+                return false;
             }
             Integer id = listedIDs.get(gameNum);
             if (id == null) {
                 System.out.println("Game does not exist");
-                return;
+                return false;
             }
             gameID = id;
-            displayChessGame(new ChessGame(), ChessGame.TeamColor.WHITE);
+            createWebsocket();
+            return true;
         } catch (Exception e) {
             System.out.println("Failed to get game");
+            return false;
         }
     }
 
@@ -419,15 +440,15 @@ public class Client {
         }
     }
 
-    public void handlePlay(String input) {
+    public boolean handlePlay(String input) {
         String[] args = input.split("\\s+");
         if (args.length < 4) {
             System.out.println("Too few inputs");
-            return;
+            return false;
         }
         if (args.length > 4) {
             System.out.println("Too many inputs");
-            return;
+            return false;
         }
         String number = args[2];
         String color = args[3];
@@ -438,7 +459,7 @@ public class Client {
             team = ChessGame.TeamColor.BLACK;
         } else {
             System.out.println("Color must be white or black");
-            return;
+            return false;
         }
         Integer id = null;
         try {
@@ -448,14 +469,16 @@ public class Client {
         }
         if (id == null) {
             System.out.println("Game " + String.valueOf(id) + " does not exist");
-            return;
+            return false;
         }
         try {
             facade.playRequest(authToken, color, id);
             gameID = id;
-            displayChessGame(new ChessGame(), team);
+            createWebsocket();
+            return true;
         } catch (RuntimeException e) {
             System.out.println("Joining game failed");
+            return false;
         }
     }
 

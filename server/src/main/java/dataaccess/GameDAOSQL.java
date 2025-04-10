@@ -61,10 +61,8 @@ public class GameDAOSQL extends DAOSQL implements GameDAO {
     }
 
     public void updateGame(GameData data) throws DataAccessException, TakenException {
-        ChessGame game = new ChessGame();
-        String gameStr = new Gson().toJson(game, ChessGame.class);
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "UPDATE games SET (white_username, black_username, serialized_game) = (?, ?, ?) WHERE game_id = ?";
+            var statement = "UPDATE games SET white_username = ?, black_username = ?, serialized_game = ? WHERE game_id = ?";
             try (var ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, data.metadata.whiteUsername);
                 ps.setString(2, data.metadata.blackUsername);

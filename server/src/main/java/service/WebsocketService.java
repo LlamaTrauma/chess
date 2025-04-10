@@ -35,15 +35,21 @@ public class WebsocketService {
                     throw new InvalidUserCommandError("Game " + String.valueOf(comm.getGameID()) + " does not exist");
                 }
                 serverGame = new ServerGame(readGame);
+            } else {
+                GameData readGame = DAO.GAME_DAO.readGame(comm.getGameID());
+                serverGame.game.metadata.whiteUsername = readGame.metadata.whiteUsername;
+                serverGame.game.metadata.blackUsername = readGame.metadata.blackUsername;
             }
             games.put(serverGame.game.metadata.gameID, serverGame);
             serverGame.connectedSessions.add(session);
-            serverGame.sendAllMessage(username + " joined the game");
             sendLoadGameMessage(session, serverGame.game);
+            serverGame.sendAllButMessage(session, username + " joined the game");
         } catch (InvalidUserCommandError e) {
             sendErrorMessage(session, e.getMessage());
+        } catch (UnauthorizedException e) {
+            sendErrorMessage(session, "unauthorized");
         } catch (Exception e) {
-// adsf
+            sendErrorMessage(session, "error");
         }
     }
 
@@ -55,6 +61,9 @@ public class WebsocketService {
             serverGame = games.get(comm.getGameID());
             if (serverGame == null) {
                 throw new InvalidUserCommandError("Game " + String.valueOf(comm.getGameID()) + " does not exist");
+            }
+            if (serverGame.userTeam(username) == null) {
+                throw new InvalidUserCommandError("You are observing this game");
             }
             if (serverGame.game.game.getTeamTurn() != serverGame.userTeam(username)) {
                 throw new InvalidUserCommandError("It is not your turn to move");
@@ -75,14 +84,17 @@ public class WebsocketService {
                         "WHITE" : "BLACK") + " is in check";
             }
             DAO.GAME_DAO.updateGame(serverGame.game);
-            serverGame.sendAllMessage(username + " made a move" + (extraInfo.isEmpty() ? "" : "\n" + extraInfo));
+            serverGame.sendAllButMessage(session, username + " made a move" + (extraInfo.isEmpty() ? "" : "\n" + extraInfo));
             serverGame.sendAllUpdate();
-        } catch (InvalidUserCommandError e) {
+        }
+        catch (InvalidUserCommandError e) {
             sendErrorMessage(session, e.getMessage());
         } catch (InvalidMoveException e) {
             sendErrorMessage(session, "invalid move");
+        } catch (UnauthorizedException e) {
+            sendErrorMessage(session, "unauthorized");
         } catch (Exception e) {
-
+            sendErrorMessage(session, "error");
         }
     }
 
@@ -94,12 +106,25 @@ public class WebsocketService {
             if (serverGame == null) {
                 throw new InvalidUserCommandError("Game " + String.valueOf(comm.getGameID()) + " does not exist");
             }
+            boolean doUpdate = false;
+            if (username.equals(serverGame.game.metadata.whiteUsername)) {
+                serverGame.game.metadata.whiteUsername = null;
+                doUpdate = true;
+            } else if (username.equals(serverGame.game.metadata.blackUsername)) {
+                serverGame.game.metadata.blackUsername = null;
+                doUpdate = true;
+            }
+            if (doUpdate) {
+                DAO.GAME_DAO.updateGame(serverGame.game);
+            }
             serverGame.connectedSessions.remove(session);
-            serverGame.sendAllMessage(username + " left");
+            serverGame.sendAllButMessage(session, username + " left");
         } catch (InvalidUserCommandError e) {
             sendErrorMessage(session, e.getMessage());
+        } catch (UnauthorizedException e) {
+            sendErrorMessage(session, "unauthorized");
         } catch (Exception e) {
-//            sendErrorMessage(session, e.getMessage());
+            sendErrorMessage(session, "error");
         }
     }
 
@@ -114,13 +139,18 @@ public class WebsocketService {
             if (serverGame.userTeam(username) == null) {
                 throw new InvalidUserCommandError("You are only observing this game");
             }
+            if (serverGame.over) {
+                throw new InvalidUserCommandError("The game is already over");
+            }
             DAO.GAME_DAO.updateGame(serverGame.game);
             serverGame.sendAllMessage(username + " resigned from the game");
             serverGame.over = true;
         } catch (InvalidUserCommandError e) {
             sendErrorMessage(session, e.getMessage());
+        } catch (UnauthorizedException e) {
+            sendErrorMessage(session, "unauthorized");
         } catch (Exception e) {
-//            sendErrorMessage(session, e.getMessage());
+            sendErrorMessage(session, "error");
         }
     }
 
